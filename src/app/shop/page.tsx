@@ -6,8 +6,9 @@ import { Footer } from '../../components/Footer';
 import { ShoppingCart, LayoutGrid, Filter, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
+import { createClient } from '../../utils/supabase/client';
 
-import { supabase } from '../../lib/supabase';
+const supabase = createClient();
 
 interface Product {
   id: number;

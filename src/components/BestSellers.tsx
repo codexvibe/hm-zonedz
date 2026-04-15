@@ -4,7 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ShoppingCart } from 'lucide-react';
 import Image from 'next/image';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/utils/supabase/client';
+
+const supabase = createClient();
 
 interface Product {
   id: number;
