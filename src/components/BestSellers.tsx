@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { ShoppingCart } from 'lucide-react';
 import Image from 'next/image';
 import { createClient } from '@/utils/supabase/client';
+import { OrderModal } from './OrderModal';
 
 const supabase = createClient();
 
@@ -69,6 +70,7 @@ const fallbackProducts: Product[] = [
 
 export const BestSellers = () => {
   const [products, setProducts] = useState<Product[]>(fallbackProducts);
+  const [orderModal, setOrderModal] = useState<{ isOpen: boolean; name: string; price: string }>({ isOpen: false, name: '', price: '' });
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -159,9 +161,12 @@ export const BestSellers = () => {
                   )}
                 </div>
 
-                <button className="mt-auto w-full bg-white text-black font-heading text-lg py-3 flex items-center justify-center gap-2 uppercase hover:bg-[#39ff14] transition-colors">
+                <button 
+                  onClick={() => setOrderModal({ isOpen: true, name: product.name, price: product.price })}
+                  className="mt-auto w-full bg-white text-black font-heading text-lg py-3 flex items-center justify-center gap-2 uppercase hover:bg-[#39ff14] transition-colors"
+                >
                   <ShoppingCart size={20} />
-                  Ajouter au panier
+                  Commander
                 </button>
               </div>
             </motion.div>
@@ -174,6 +179,13 @@ export const BestSellers = () => {
           </a>
         </div>
       </div>
+
+      <OrderModal
+        isOpen={orderModal.isOpen}
+        onClose={() => setOrderModal({ isOpen: false, name: '', price: '' })}
+        productName={orderModal.name}
+        productPrice={orderModal.price}
+      />
     </section>
   );
 };
