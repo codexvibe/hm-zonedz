@@ -21,7 +21,7 @@ export const Footer = () => {
               <li><Link href="/" className="text-[#a1a1aa] hover:text-[#39ff14] transition-colors">Accueil</Link></li>
               <li><Link href="#shop" className="text-[#a1a1aa] hover:text-[#39ff14] transition-colors">Boutique</Link></li>
               <li><Link href="#vapes" className="text-[#a1a1aa] hover:text-[#39ff14] transition-colors">Vapes Jetables</Link></li>
-              <li><Link href="#gros" className="text-[#a1a1aa] hover:text-[#39ff14] transition-colors border-b border-[#39ff14] inline-block">Gros & Détail</Link></li>
+              <li><Link href="/gros" className="text-[#a1a1aa] hover:text-[#39ff14] transition-colors border-b border-[#39ff14] inline-block">Acheter en Gros</Link></li>
             </ul>
           </div>
 

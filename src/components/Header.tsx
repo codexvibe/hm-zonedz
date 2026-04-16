@@ -22,7 +22,7 @@ export const Header = () => {
     { name: 'Accueil', href: '/' },
     { name: 'Boutique', href: '/shop' },
     { name: 'Promotions', href: '/promos' },
-    { name: 'Gros & Détail', href: '#gros' },
+    { name: 'Acheter en Gros', href: '/gros' },
   ];
 
   return (
