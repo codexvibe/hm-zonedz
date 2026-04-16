@@ -21,7 +21,7 @@ export const Header = () => {
   const navLinks = [
     { name: 'Accueil', href: '/' },
     { name: 'Boutique', href: '/shop' },
-    { name: 'Promotions', href: '#promos' },
+    { name: 'Promotions', href: '/promos' },
     { name: 'Gros & Détail', href: '#gros' },
   ];
 
