@@ -34,7 +34,8 @@ export default function Wholesale() {
           customer_address: formData.message || 'Demande de devis gros',
           product_name: 'DEMANDE DE GROS (B2B)',
           product_price: 'PRIX DE GROS',
-          status: 'Gros'
+          status: 'Gros',
+          total_price: 0
         });
 
       if (error) throw error;

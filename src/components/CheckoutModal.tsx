@@ -62,6 +62,7 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
           customer_address: address || 'Non précisée',
           product_name: productsSummary,
           product_price: `${total.toLocaleString()} DZD (Prod: ${subtotal}, Liv: ${deliveryPrice})`,
+          total_price: total,
           status: 'Panier'
         });
 
