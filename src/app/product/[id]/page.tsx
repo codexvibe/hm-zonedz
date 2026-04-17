@@ -194,12 +194,12 @@ export default function ProductDetail() {
             {/* 3. Panneau de détails (Droite) */}
             <div className="lg:col-span-5 flex flex-col pt-4">
               <div className="mb-10">
-                <span className="text-xs font-bold text-gray-400 uppercase tracking-[0.4em] mb-3 block">
+                <span className="text-[10px] font-bold text-[#39ff14] uppercase tracking-[0.4em] mb-3 block border-l-2 border-[#39ff14] pl-3">
                   {product.category}
                 </span>
-                <h1 className="text-4xl lg:text-7xl font-heading text-white font-bold uppercase tracking-tighter leading-[0.85] mb-4">
+                <h1 className="text-5xl lg:text-8xl font-heading text-white uppercase leading-none mb-4">
                   {product.name.split(' ').slice(0, 2).join(' ')} <br />
-                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-500">{product.name.split(' ').slice(2).join(' ')}</span>
+                  <span className="text-[#39ff14] drop-shadow-[0_0_20px_rgba(57,255,20,0.5)]">{product.name.split(' ').slice(2).join(' ')}</span>
                 </h1>
                 
                 <div className="flex items-center gap-4 mb-10">
