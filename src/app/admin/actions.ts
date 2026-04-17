@@ -71,6 +71,9 @@ export async function createProductAction(formData: FormData) {
   }
 
   revalidatePath('/')
+  revalidatePath('/shop')
+  revalidatePath('/promos')
+  revalidatePath('/gros')
   revalidatePath('/admin/dashboard')
   return { success: true, data }
 }
@@ -95,6 +98,9 @@ export async function updateProductAction(id: number, formData: FormData) {
   }
 
   revalidatePath('/')
+  revalidatePath('/shop')
+  revalidatePath('/promos')
+  revalidatePath('/gros')
   revalidatePath('/admin/dashboard')
   return { success: true, data }
 }
@@ -113,6 +119,9 @@ export async function deleteProductAction(id: number) {
   }
 
   revalidatePath('/')
+  revalidatePath('/shop')
+  revalidatePath('/promos')
+  revalidatePath('/gros')
   revalidatePath('/admin/dashboard')
   return { success: true }
 }
