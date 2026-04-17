@@ -50,12 +50,23 @@ export default function ProductDetail() {
         .single();
 
       if (data) {
-        const parsedFlavors = typeof data.flavors === 'string' 
-          ? JSON.parse(data.flavors) 
-          : (data.flavors || []);
+        let parsedFlavors: { name: string; detail?: string }[] = [];
+
+        if (typeof data.flavors === 'string') {
+          try {
+            const raw = JSON.parse(data.flavors);
+            // Handle both [{ name: "X" }] and ["X", "Y"] formats
+            parsedFlavors = Array.isArray(raw)
+              ? raw.map((f: any) => typeof f === 'string' ? { name: f } : f)
+              : [];
+          } catch {
+            parsedFlavors = [];
+          }
+        } else if (Array.isArray(data.flavors)) {
+          parsedFlavors = data.flavors.map((f: any) => typeof f === 'string' ? { name: f } : f);
+        }
         
         setProduct({ ...data, flavors: parsedFlavors });
-        // Set default flavor if not empty
         if (parsedFlavors.length > 0) {
           setSelectedFlavor(parsedFlavors[0].name);
         }
@@ -271,8 +282,8 @@ export default function ProductDetail() {
                       onClick={() => setSelectedFlavor(flavor.name)}
                       className={`relative p-4 border text-left transition-all duration-300 ${selectedFlavor === flavor.name ? 'border-[#ff00ff] bg-[#ff00ff]/10 text-[#ff00ff] shadow-[0_0_15px_rgba(255,0,255,0.1)]' : 'border-white/10 hover:border-white/30 text-white/60 hover:text-white bg-white/[0.02]'}`}
                     >
-                      <span className="text-[10px] font-bold uppercase tracking-widest block">{flavor.name}</span>
-                      {flavor.detail && <span className="text-[8px] text-gray-500 block mt-1">{flavor.detail}</span>}
+                      <span className="text-sm font-bold uppercase tracking-widest block text-inherit">{flavor.name}</span>
+                      {flavor.detail && <span className="text-xs text-gray-400 block mt-1">{flavor.detail}</span>}
                     </button>
                   ))}
                 </div>
