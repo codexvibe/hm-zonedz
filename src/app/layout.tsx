@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Anton } from "next/font/google";
 import "./globals.css";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
 const anton = Anton({ weight: "400", subsets: ["latin"], variable: '--font-anton' });
@@ -26,6 +27,7 @@ export default function RootLayout({
             {children}
           </CartProvider>
         </ThemeProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
