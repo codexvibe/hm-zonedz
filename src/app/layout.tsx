@@ -20,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" suppressHydrationWarning>
-      <body className={`${inter.variable} ${anton.variable} font-sans antialiased bg-white dark:bg-black text-black dark:text-white transition-colors duration-300`}>
+      <body suppressHydrationWarning className={`${inter.variable} ${anton.variable} font-sans antialiased bg-white dark:bg-black text-black dark:text-white transition-colors duration-300`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
           <CartProvider>
             {children}

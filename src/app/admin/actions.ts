@@ -50,18 +50,36 @@ export async function createProductAction(formData: FormData) {
   const supabase = await createClient()
   
   const name = formData.get('name') as string
-  const category = formData.get('category') as string
+  const category = (formData.get('category') as string) || 'Vape'
   const price = formData.get('price') as string
   const old_price = formData.get('old_price') as string
   const badge = formData.get('badge') as string
   const badge_color = formData.get('badge_color') as string
   const glow_color = formData.get('glow_color') as string
+  const images = JSON.parse(formData.get('images') as string || '[]')
+  const video_url = formData.get('video_url') as string
   const image_url = formData.get('image_url') as string
+  const description = formData.get('description') as string
+  const stock_quantity = parseInt(formData.get('stock_quantity') as string || '0')
+  const is_visible = formData.get('is_visible') === 'true'
+  const is_18_plus = formData.get('is_18_plus') === 'true'
+  
+  let flavors = []
+  try {
+    const rf = formData.get('flavors') as string
+    if (rf) flavors = JSON.parse(rf)
+  } catch (e) {
+    console.error('Failed to parse flavors', e)
+  }
 
   const { data, error } = await supabase
     .from('products')
     .insert([
-      { name, category, price, old_price, badge, badge_color, glow_color, image_url }
+      { 
+        name, category, price, old_price, badge, 
+        badge_color, glow_color, image_url, images, video_url, flavors,
+        description, stock_quantity, is_visible, is_18_plus 
+      }
     ])
     .select()
 
@@ -83,7 +101,25 @@ export async function updateProductAction(id: number, formData: FormData) {
   
   const updates: any = {}
   formData.forEach((value, key) => {
-    if (key !== 'id') updates[key] = value
+    if (key === 'flavors') {
+      try {
+        updates[key] = JSON.parse(value as string)
+      } catch (e) {
+        updates[key] = []
+      }
+    } else if (key === 'stock_quantity') {
+      updates[key] = parseInt(value as string || '0')
+    } else if (key === 'is_visible' || key === 'is_18_plus') {
+      updates[key] = value === 'true'
+    } else if (key === 'images') {
+      try {
+        updates[key] = JSON.parse(value as string)
+      } catch (e) {
+        updates[key] = []
+      }
+    } else if (key !== 'id') {
+      updates[key] = value
+    }
   })
 
   const { data, error } = await supabase
@@ -102,6 +138,7 @@ export async function updateProductAction(id: number, formData: FormData) {
   revalidatePath('/promos')
   revalidatePath('/gros')
   revalidatePath('/admin/dashboard')
+  revalidatePath(`/product/${id}`)
   return { success: true, data }
 }
 
@@ -150,17 +187,31 @@ export async function updateOrderStatusAction(id: number, status: string) {
   return { success: true }
 }
 
+export async function deleteOrderAction(id: number) {
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('orders')
+    .delete()
+    .eq('id', id)
+
+  if (error) return { error: error.message }
+  revalidatePath('/admin/dashboard')
+  return { success: true }
+}
+
 // Analytics Actions
 export async function getDashboardStatsAction() {
   const supabase = await createClient()
   
-  // Get all orders to calculate revenue
+  // Get all orders
   const { data: orders } = await supabase.from('orders').select('total_price, status')
   const { data: products } = await supabase.from('products').select('name, views_count, price')
 
-  const totalRevenue = orders?.reduce((acc, order) => {
-    // We count the total_price from the old SQL schema
-    return acc + (Number(order.total_price) || 0)
+  // Calculate revenue from delivered orders only
+  const totalRevenue = orders?.filter(order => order.status === 'Livrée').reduce((acc, order) => {
+    // Safe parse: extract numbers from string just in case it holds "3500 DZD"
+    const parsedPrice = parseFloat(String(order.total_price || 0).replace(/[^0-9.]/g, ''))
+    return acc + (isNaN(parsedPrice) ? 0 : parsedPrice)
   }, 0) || 0
 
   const totalOrders = orders?.length || 0

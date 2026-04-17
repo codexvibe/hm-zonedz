@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { logoutAction, createProductAction, deleteProductAction, uploadImageAction } from '../actions'
 import DashboardClient from './DashboardClient'
+export const dynamic = 'force-dynamic';
 
 export default async function AdminDashboard() {
   const session = await verifySession()

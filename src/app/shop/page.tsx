@@ -6,6 +6,7 @@ import { Footer } from '../../components/Footer';
 import { ShoppingCart, LayoutGrid, Filter, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
+import Link from 'next/link';
 import { createClient } from '../../utils/supabase/client';
 import { useCart } from '../../context/CartContext';
 
@@ -21,6 +22,7 @@ interface Product {
   badge: string;
   badgeColor: string;
   glowColor: string;
+  flavors?: (string | { name: string; detail: string })[];
 }
 
 const fallbackProducts: Product[] = [
@@ -31,16 +33,41 @@ const fallbackProducts: Product[] = [
   { id: 5, name: 'VELO FREEZE MAX', category: 'Snus', price: '1 000 DZD', oldPrice: null, image: '/assets/snus_pablo.png', badge: '', badgeColor: '', glowColor: 'box-glow-green-hover' },
   { id: 6, name: 'ELFBAR 600 V2', category: 'Vape Jetable', price: '1 800 DZD', oldPrice: null, image: '/assets/vape_tornado.png', badge: 'CLASSIC', badgeColor: 'bg-white text-black', glowColor: 'box-glow-green-hover' },
   { id: 7, name: 'CUBA BLACK LINE', category: 'Snus', price: '1 400 DZD', oldPrice: null, image: '/assets/snus_pablo.png', badge: 'EXTRÊME ☠️', badgeColor: 'bg-black text-white border border-[#ef4444]', glowColor: 'hover:shadow-[0_0_25px_rgba(239,68,68,0.8)]' },
-  { id: 8, name: 'CRYSTAL BAR 4000', category: 'Vape Jetable', price: '2 800 DZD', oldPrice: null, image: '/assets/vape_tornado.png', badge: '', badgeColor: '', glowColor: 'box-glow-green-hover' }
+  { id: 8, name: 'CRYSTAL BAR 4000', category: 'Vape Jetable', price: '2 800 DZD', oldPrice: null, image: '/assets/vape_tornado.png', badge: '', badgeColor: '', glowColor: 'box-glow-green-hover' },
+  { id: 9, name: 'JNR ROCKET 25K', category: 'Puff', price: '4 500 DZD', oldPrice: '5 000 DZD', image: '/assets/vape_tornado.png', badge: 'MAX PUFFS 🚀', badgeColor: 'bg-blue-600', glowColor: 'hover:shadow-[0_0_25px_rgba(37,99,235,0.6)]' },
+  { id: 10, name: 'RABBIT BLUE ICE', category: 'Snus', price: '1 300 DZD', oldPrice: null, image: '/assets/snus_pablo.png', badge: 'NEW BRAND', badgeColor: 'bg-blue-400 text-black', glowColor: 'box-glow-green-hover' },
+  { id: 11, name: 'VUSE GO 5000', category: 'Vape Jetable', price: '3 200 DZD', oldPrice: null, image: '/assets/vape_tornado.png', badge: 'DESIGN 💎', badgeColor: 'bg-slate-800 text-white', glowColor: 'box-glow-green-hover' },
+  { id: 12, name: 'WHITE FOX FULL CHARGE', category: 'Snus', price: '1 500 DZD', oldPrice: null, image: '/assets/snus_pablo.png', badge: 'PREMIUM ✨', badgeColor: 'bg-indigo-600', glowColor: 'hover:shadow-[0_0_25px_rgba(79,70,229,0.6)]' },
+  { id: 13, name: 'TORNADO 12000 PRO', category: 'Puff 12k', price: '4 200 DZD', oldPrice: null, image: '/assets/vape_tornado.png', badge: 'XL CAPACITY', badgeColor: 'bg-orange-600', glowColor: 'hover:shadow-[0_0_25px_rgba(249,115,22,0.6)]' },
+  { id: 14, name: 'VELO ICE COOL', category: 'Snus', price: '1 150 DZD', oldPrice: null, image: '/assets/snus_pablo.png', badge: 'BEST SELLER', badgeColor: 'bg-[#39ff14] text-black', glowColor: 'box-glow-green-hover' },
+  { id: 15, name: 'KILLA WATERMELON', category: 'Snus', price: '1 100 DZD', oldPrice: null, image: '/assets/snus_pablo.png', badge: 'FRUITÉ 🍉', badgeColor: 'bg-pink-600', glowColor: 'hover:shadow-[0_0_25px_rgba(219,39,119,0.6)]' },
+  { id: 16, name: 'ELFBAR PI9000', category: 'Puff', price: '3 800 DZD', oldPrice: null, image: '/assets/vape_tornado.png', badge: 'COMPACT', badgeColor: 'bg-purple-600', glowColor: 'box-glow-green-hover' }
 ];
 
-const categories = ['Toutes', 'Snus', 'Vape Jetable', 'Puff', 'E-Liquides'];
+// Liste de base des catégories (Sera fusionnée avec les catégories réelles des produits)
+const DEFAULT_CATEGORIES = [
+  'Toutes', 
+  'Promotions', 
+  'Snus', 
+  'Vape Jetable', 
+  'Puff', 
+  'Puff 9k', 
+  'Puff 12k', 
+  'Puff 15k', 
+  'Puff 25k', 
+  'E-Liquides', 
+  'Gros', 
+  'Accessoires'
+];
 
 export default function Shop() {
   const [activeCategory, setActiveCategory] = useState('Toutes');
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [products, setProducts] = useState<Product[]>(fallbackProducts);
+  const [selectedFlavors, setSelectedFlavors] = useState<Record<number, string>>({});
   const { addToCart } = useCart();
+
+  const availableCategories = Array.from(new Set([...DEFAULT_CATEGORIES, ...products.map(p => p.category)]));
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -63,8 +90,9 @@ export default function Shop() {
             oldPrice: item.old_price,
             image: item.image_url,
             badge: item.badge,
-            badgeColor: item.badge_color,
-            glowColor: item.glow_color
+            badgeColor: item.badge_color || 'bg-[#ef4444]',
+            glowColor: item.glow_color || 'box-glow-green-hover',
+            flavors: item.flavors || []
           }));
           setProducts(mappedData);
         }
@@ -78,7 +106,9 @@ export default function Shop() {
 
   const filteredProducts = activeCategory === 'Toutes' 
     ? products 
-    : products.filter(p => p.category === activeCategory);
+    : activeCategory === 'Promotions'
+      ? products.filter(p => p.oldPrice && p.oldPrice !== '')
+      : products.filter(p => p.category.toLowerCase() === activeCategory.toLowerCase());
 
   return (
     <>
@@ -113,7 +143,7 @@ export default function Shop() {
                   Catégories
                 </h3>
                 <ul className="flex flex-col gap-3 font-sans">
-                  {categories.map((cat) => (
+                  {availableCategories.map((cat) => (
                     <li key={cat}>
                       <button 
                         onClick={() => setActiveCategory(cat)}
@@ -133,15 +163,14 @@ export default function Shop() {
 
             {/* Product Grid */}
             <div className="flex-1">
-              <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <AnimatePresence>
                   {filteredProducts.map((product) => (
                     <motion.div
-                      layout
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.9 }}
-                      transition={{ duration: 0.3 }}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
                       key={product.id}
                       className={`bg-white dark:bg-[#0f0f0f] border border-black/5 dark:border-white/5 p-4 flex flex-col group transition-all duration-300 ${product.glowColor} relative overflow-hidden`}
                       onClick={() => {
@@ -155,12 +184,11 @@ export default function Shop() {
                       )}
 
                       <div className="h-64 w-full relative mb-6 bg-gray-100 dark:bg-black rounded-sm overflow-hidden flex items-center justify-center p-4">
-                        <Image 
+                        <img 
                           src={product.image} 
                           alt={product.name} 
-                          width={180}
-                          height={180}
-                          className="max-h-full object-contain group-hover:scale-110 transition-transform duration-500 will-change-transform"
+                          loading="lazy"
+                          className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" 
                         />
                       </div>
 
@@ -172,18 +200,42 @@ export default function Shop() {
                           <span className="text-2xl font-bold font-sans text-[#39ff14]">{product.price}</span>
                         </div>
 
-                        <button 
-                          onClick={() => addToCart(product)}
-                          className="mt-auto w-full bg-black dark:bg-white text-white dark:text-black font-heading text-lg py-3 flex items-center justify-center gap-2 uppercase hover:bg-[#39ff14] dark:hover:bg-[#39ff14] hover:text-black dark:hover:text-black transition-colors"
-                        >
-                          <ShoppingCart size={20} />
-                          Ajouter au panier
-                        </button>
+                        {product.flavors && product.flavors.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mb-4">
+                            {product.flavors.slice(0, 3).map((f: any, i) => (
+                              <span key={i} className="text-[8px] bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 px-1.5 py-0.5 text-black/40 dark:text-white/40 uppercase">
+                                {typeof f === 'string' ? f : f.name}
+                              </span>
+                            ))}
+                            {product.flavors.length > 3 && <span className="text-[8px] text-white/20">+{product.flavors.length - 3}</span>}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex flex-col gap-2 relative z-10 pt-4 border-t border-black/5 dark:border-white/5">
+                        <div className="flex gap-2">
+                          <Link href={`/product/${product.id}`} className="flex-1 bg-white/5 hover:bg-white/10 dark:bg-white/5 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 text-black dark:text-white font-heading py-2 text-center text-xs uppercase tracking-widest transition-all">
+                            Voir Détails
+                          </Link>
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const firstFlavor = product.flavors?.[0];
+                              const flavor = typeof firstFlavor === 'string' 
+                                ? firstFlavor 
+                                : (firstFlavor as any)?.name || '';
+                              addToCart(product as any, flavor);
+                            }}
+                            className="flex-1 bg-[#39ff14] hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black text-black font-heading py-2 text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2"
+                          >
+                            <ShoppingCart size={14} /> Acheter
+                          </button>
+                        </div>
                       </div>
                     </motion.div>
                   ))}
                 </AnimatePresence>
-              </motion.div>
+              </div>
               
               {filteredProducts.length === 0 && (
                 <div className="text-center py-20">
@@ -219,7 +271,7 @@ export default function Shop() {
             
             <div className="p-6 overflow-y-auto">
               <ul className="flex flex-col gap-4 font-sans text-xl">
-                {categories.map((cat) => (
+                {availableCategories.map((cat) => (
                   <li key={cat}>
                     <button 
                       onClick={() => {

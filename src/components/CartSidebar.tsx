@@ -72,7 +72,7 @@ export const CartSidebar = () => {
                 ) : (
                   <div className="flex flex-col gap-6">
                     {cart.map((item) => (
-                      <div key={item.id} className="flex gap-4 group">
+                      <div key={`${item.id}-${item.flavor || 'none'}`} className="flex gap-4 group">
                         <div className="w-20 h-20 bg-gray-100 dark:bg-black rounded-sm border border-black/5 dark:border-white/5 flex-shrink-0 flex items-center justify-center overflow-hidden">
                           <Image 
                             src={item.image} 
@@ -86,18 +86,25 @@ export const CartSidebar = () => {
                           <div className="flex justify-between items-start mb-1">
                             <h4 className="font-heading text-black dark:text-white text-lg leading-tight">{item.name}</h4>
                             <button 
-                              onClick={() => removeFromCart(item.id)}
+                              onClick={() => removeFromCart(item.id, item.flavor)}
                               className="text-black/20 dark:text-white/20 hover:text-[#ef4444] dark:hover:text-[#ef4444] transition-colors"
                             >
                               <Trash2 size={16} />
                             </button>
                           </div>
-                          <p className="text-[#39ff14] font-bold text-sm mb-3">{item.price}</p>
+                          <div className="flex flex-wrap items-center gap-2 mb-2">
+                            <p className="text-[#39ff14] font-bold text-sm">{item.price}</p>
+                            {item.flavor && (
+                              <span className="text-[10px] font-bold uppercase tracking-widest bg-black/5 dark:bg-white/5 px-2 py-0.5 rounded text-[#a1a1aa] border border-black/5 dark:border-white/5">
+                                {item.flavor}
+                              </span>
+                            )}
+                          </div>
                           
                           <div className="flex items-center justify-between">
                             <div className="flex items-center border border-black/10 dark:border-white/10 rounded-sm">
                               <button 
-                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                onClick={() => updateQuantity(item.id, item.quantity - 1, item.flavor)}
                                 className="px-2 py-1 text-black/50 dark:text-white/50 hover:text-black dark:hover:text-white transition-colors"
                               >
                                 <Minus size={14} />
@@ -106,7 +113,7 @@ export const CartSidebar = () => {
                                 {item.quantity}
                               </span>
                               <button 
-                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                onClick={() => updateQuantity(item.id, item.quantity + 1, item.flavor)}
                                 className="px-2 py-1 text-black/50 dark:text-white/50 hover:text-black dark:hover:text-white transition-colors"
                               >
                                 <Plus size={14} />

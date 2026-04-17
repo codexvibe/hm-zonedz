@@ -9,13 +9,14 @@ export interface CartItem {
   image: string;
   category: string;
   quantity: number;
+  flavor?: string;
 }
 
 interface CartContextType {
   cart: CartItem[];
-  addToCart: (product: any) => void;
-  removeFromCart: (productId: number) => void;
-  updateQuantity: (productId: number, quantity: number) => void;
+  addToCart: (product: any, flavor?: string) => void;
+  removeFromCart: (productId: number, flavor?: string) => void;
+  updateQuantity: (productId: number, quantity: number, flavor?: string) => void;
   clearCart: () => void;
   subtotal: number;
   itemCount: number;
@@ -46,12 +47,12 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.setItem('hm_zonedz_cart', JSON.stringify(cart));
   }, [cart]);
 
-  const addToCart = (product: any) => {
+  const addToCart = (product: any, flavor?: string) => {
     setCart(prevCart => {
-      const existingItem = prevCart.find(item => item.id === product.id);
+      const existingItem = prevCart.find(item => item.id === product.id && item.flavor === flavor);
       if (existingItem) {
         return prevCart.map(item => 
-          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+          (item.id === product.id && item.flavor === flavor) ? { ...item, quantity: item.quantity + 1 } : item
         );
       }
       return [...prevCart, { 
@@ -60,23 +61,24 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         price: product.price, 
         image: product.image || product.image_url,
         category: product.category,
-        quantity: 1 
+        quantity: 1,
+        flavor
       }];
     });
-    setIsSidebarOpen(true); // Ouvrir le panier quand on ajoute un produit
+    setIsSidebarOpen(true);
   };
 
-  const removeFromCart = (productId: number) => {
-    setCart(prevCart => prevCart.filter(item => item.id !== productId));
+  const removeFromCart = (productId: number, flavor?: string) => {
+    setCart(prevCart => prevCart.filter(item => !(item.id === productId && item.flavor === flavor)));
   };
 
-  const updateQuantity = (productId: number, quantity: number) => {
+  const updateQuantity = (productId: number, quantity: number, flavor?: string) => {
     if (quantity < 1) {
-      removeFromCart(productId);
+      removeFromCart(productId, flavor);
       return;
     }
     setCart(prevCart => 
-      prevCart.map(item => item.id === productId ? { ...item, quantity } : item)
+      prevCart.map(item => (item.id === productId && item.flavor === flavor) ? { ...item, quantity } : item)
     );
   };
 

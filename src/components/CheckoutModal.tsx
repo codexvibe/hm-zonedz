@@ -50,8 +50,17 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
     try {
       const supabase = createClient();
       
-      // On crée un résumé des produits pour la table
-      const productsSummary = cart.map(item => `${item.name} (x${item.quantity})`).join(', ');
+      // On regroupe les produits par nom pour un résumé plus propre
+      const groupedItems = cart.reduce((acc, item) => {
+        if (!acc[item.name]) acc[item.name] = [];
+        const flavorStr = item.flavor ? `${item.flavor} ` : '';
+        acc[item.name].push(`${flavorStr}(x${item.quantity})`);
+        return acc;
+      }, {} as Record<string, string[]>);
+
+      const productsSummary = Object.entries(groupedItems)
+        .map(([name, variants]) => `${name.toLowerCase()} ${variants.join(' ')}`)
+        .join(', ');
 
       const { error } = await supabase
         .from('orders')
@@ -61,9 +70,9 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
           customer_wilaya: wilaya,
           customer_address: address || 'Non précisée',
           items_list: productsSummary,
-          subtotal_price: subtotal,
-          delivery_price: deliveryPrice,
-          total_price: total,
+          subtotal_price: Number(subtotal),
+          delivery_price: Number(deliveryPrice),
+          total_price: String(total),
           status: 'Nouveau'
         });
 

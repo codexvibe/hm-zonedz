@@ -5,11 +5,11 @@ import {
   Plus, Trash2, Edit, Upload, X, Check, AlertCircle, 
   ExternalLink, Image as ImageIcon, ShoppingCart, 
   TrendingUp, Users, Package, Clock, CheckCircle2, 
-  Truck, XCircle, DollarSign, Eye, Search, BarChart3
+  Truck, XCircle, DollarSign, Eye, Search, BarChart3, Play
 } from 'lucide-react'
 import { 
   createProductAction, deleteProductAction, updateProductAction, 
-  uploadImageAction, getOrdersAction, updateOrderStatusAction,
+  uploadImageAction, getOrdersAction, updateOrderStatusAction, deleteOrderAction,
   getDashboardStatsAction, getAdminsAction, addAdminAction, deleteAdminAction
 } from '../actions'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -17,14 +17,22 @@ import { motion, AnimatePresence } from 'framer-motion'
 interface Product {
   id: number
   name: string
+  description?: string
   category: string
   price: string
   old_price: string | null
-  image_url: string
+  sku?: string
+  stock_quantity?: number
+  is_visible?: boolean
+  is_18_plus?: boolean
+  images: string[]
+  video_url: string | null
+  image_url: string // For compatibility
   badge: string | null
   badge_color: string | null
   glow_color: string | null
   views_count?: number
+  flavors?: { name: string, detail: string }[]
 }
 
 interface Order {
@@ -61,15 +69,27 @@ export default function DashboardClient({ initialProducts }: { initialProducts: 
   const [uploading, setUploading] = useState(false)
   const [uploadedUrl, setUploadedUrl] = useState('')
 
+  const [isAddingNewCategory, setIsAddingNewCategory] = useState(false)
+  const [isAddingNewBadgeText, setIsAddingNewBadgeText] = useState(false)
+  const [isAddingNewBadgeColor, setIsAddingNewBadgeColor] = useState(false)
+  const [isAddingNewGlow, setIsAddingNewGlow] = useState(false)
+  
   const [formData, setFormData] = useState({
     name: '',
-    category: 'Snus',
+    description: '',
+    category: 'Vape',
     price: '',
     old_price: '',
+    stock_quantity: 0,
+    is_visible: true,
+    is_18_plus: false,
     badge: '',
     badge_color: 'bg-[#ef4444]',
     glow_color: 'box-glow-green-hover',
-    image_url: ''
+    images: [] as string[],
+    video_url: '',
+    image_url: '',
+    flavors: [] as { name: string, detail: string }[]
   })
 
   const [adminFormData, setAdminFormData] = useState({
@@ -94,6 +114,8 @@ export default function DashboardClient({ initialProducts }: { initialProducts: 
     setStats(result)
   }
 
+  const DEFAULT_CATEGORIES = ['Vape', 'Snus', 'Puff', 'E-Liquides', 'Accessoires', 'Promos', 'Gros', 'Puff 9k', 'Puff 12k', 'Puff 15k'];
+
   const fetchAdmins = async () => {
     const result = await getAdminsAction()
     if (result.data) setAdmins(result.data as AdminProfile[])
@@ -102,31 +124,48 @@ export default function DashboardClient({ initialProducts }: { initialProducts: 
   const resetForm = () => {
     setFormData({
       name: '',
-      category: 'Snus',
+      description: '',
+      category: 'Vape',
       price: '',
       old_price: '',
+      stock_quantity: 0,
+      is_visible: true,
+      is_18_plus: false,
       badge: '',
       badge_color: 'bg-[#ef4444]',
       glow_color: 'box-glow-green-hover',
-      image_url: ''
+      images: [],
+      video_url: '',
+      image_url: '',
+      flavors: []
     })
     setUploadedUrl('')
     setEditingProduct(null)
+    setIsAddingNewCategory(false)
+    setIsAddingNewBadgeText(false)
+    setIsAddingNewBadgeColor(false)
+    setIsAddingNewGlow(false)
   }
 
   const handleEdit = (product: Product) => {
     setEditingProduct(product)
     setFormData({
       name: product.name,
-      category: product.category,
+      description: product.description || '',
+      category: product.category || 'Vape',
       price: product.price,
       old_price: product.old_price || '',
+      stock_quantity: product.stock_quantity || 0,
+      is_visible: product.is_visible ?? true,
+      is_18_plus: product.is_18_plus ?? false,
       badge: product.badge || '',
       badge_color: product.badge_color || 'bg-[#ef4444]',
       glow_color: product.glow_color || 'box-glow-green-hover',
-      image_url: product.image_url
+      images: product.images || (product.image_url ? [product.image_url] : []),
+      video_url: product.video_url || '',
+      image_url: product.image_url || '',
+      flavors: product.flavors || []
     })
-    setUploadedUrl(product.image_url)
     setIsModalOpen(true)
   }
 
@@ -134,16 +173,36 @@ export default function DashboardClient({ initialProducts }: { initialProducts: 
     if (!confirm('Voulez-vous vraiment supprimer ce produit ?')) return
     startTransition(async () => {
       const result = await deleteProductAction(id)
-      if (result.success) setProducts(products.filter(p => p.id !== id))
+      if (result.success) {
+        setProducts(products.filter(p => p.id !== id))
+      } else {
+        alert("Erreur lors de la suppression : " + (result.error || "Inconnue"))
+      }
     })
   }
 
   const handleUpdateOrderStatus = async (id: number, status: string) => {
     const result = await updateOrderStatusAction(id, status)
-    if (result.success) fetchOrders()
+    if (result.success) {
+      fetchOrders()
+    } else {
+      alert("Erreur lors de la mise à jour : " + (result.error || "Inconnue"))
+    }
   }
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDeleteOrder = async (id: number) => {
+    if (!confirm('Voulez-vous vraiment supprimer cette commande ?')) return
+    startTransition(async () => {
+      const result = await deleteOrderAction(id)
+      if (result.success) {
+        setOrders(orders.filter(o => o.id !== id))
+      } else {
+        alert("Erreur lors de la suppression de la commande : " + (result.error || "Inconnue"))
+      }
+    })
+  }
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>, isVideo = false) => {
     const file = e.target.files?.[0]
     if (!file) return
     setUploading(true)
@@ -152,23 +211,42 @@ export default function DashboardClient({ initialProducts }: { initialProducts: 
     const result = await uploadImageAction(formDataUpload)
     setUploading(false)
     if (result.publicUrl) {
-      setUploadedUrl(result.publicUrl)
-      setFormData(prev => ({ ...prev, image_url: result.publicUrl }))
+      if (isVideo) {
+        setFormData(prev => ({ ...prev, video_url: result.publicUrl }))
+      } else {
+        setFormData(prev => {
+          const newImages = [...prev.images, result.publicUrl].slice(0, 5)
+          return { 
+            ...prev, 
+            images: newImages,
+            image_url: prev.image_url || result.publicUrl 
+          }
+        })
+      }
+    } else if (result.error) {
+      alert("Erreur Upload : " + result.error)
     }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const submissionData = new FormData()
-    Object.entries(formData).forEach(([key, value]) => submissionData.append(key, value))
+    Object.entries(formData).forEach(([key, value]) => {
+      if (key === 'flavors' || key === 'images') {
+        submissionData.append(key, JSON.stringify(value))
+      } else {
+        submissionData.append(key, String(value || ''))
+      }
+    })
+    
     startTransition(async () => {
       const result = editingProduct 
         ? await updateProductAction(editingProduct.id, submissionData)
         : await createProductAction(submissionData)
       if (result.success) {
-        setIsModalOpen(false)
-        resetForm()
         window.location.reload()
+      } else {
+        alert("Erreur : " + result.error)
       }
     })
   }
@@ -225,7 +303,7 @@ export default function DashboardClient({ initialProducts }: { initialProducts: 
       <AnimatePresence mode="wait">
         {/* INVENTORY TAB */}
         {activeTab === 'inventory' && (
-          <motion.div key="inventory" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-6">
+          <div key="inventory" className="space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-[#0f0f0f] border border-black/5 dark:border-white/5 p-4 sm:p-6 shadow-sm dark:shadow-none">
               <div>
                 <h2 className="text-lg sm:text-xl font-heading uppercase tracking-widest text-[#a1a1aa]">Inventaire</h2>
@@ -238,43 +316,53 @@ export default function DashboardClient({ initialProducts }: { initialProducts: 
                 <Plus size={20} /> Nouveau Produit
               </button>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {products.map((product) => (
-                <div key={product.id} className="bg-white dark:bg-[#0f0f0f] border border-black/5 dark:border-white/5 p-4 flex flex-col group relative overflow-hidden transition-all hover:border-[#39ff14]/30 shadow-sm dark:shadow-none">
-                  <div className="aspect-square bg-gray-100 dark:bg-black mb-4 flex items-center justify-center relative overflow-hidden border border-black/5 dark:border-white/5">
+                <div key={product.id} className="bg-[#050505] border border-white/5 p-5 flex flex-col group relative overflow-hidden transition-all hover:border-[#39ff14]/30 shadow-2xl">
+                  <div className="aspect-[4/5] bg-gradient-to-b from-[#0a0a0a] to-[#000000] mb-6 flex items-center justify-center relative overflow-hidden border border-white/5 group-hover:bg-white/[0.02] transition-colors">
                     {product.image_url ? (
-                      <img src={product.image_url} alt={product.name} className="w-full h-full object-contain p-4" />
+                      <img 
+                        src={product.image_url} 
+                        alt={product.name} 
+                        loading="lazy"
+                        className="w-full h-full object-contain p-8 group-hover:scale-105 transition-transform duration-500" 
+                      />
                     ) : (
-                      <ImageIcon className="text-[#262626]" size={48} />
+                      <ImageIcon className="text-white/10" size={48} />
                     )}
-                    <div className="absolute top-2 right-2 flex items-center gap-1 bg-black/60 px-2 py-1 backdrop-blur-md rounded-full">
-                       <Eye size={10} className="text-[#39ff14]" />
-                       <span className="text-[10px] font-bold text-white">{product.views_count || 0}</span>
+                    <div className="absolute top-3 left-3 flex flex-col gap-2">
+                       {product.is_18_plus && (
+                        <span className="bg-red-500/10 border border-red-500/20 text-red-500 text-[8px] font-bold px-2 py-1 uppercase tracking-widest">18+</span>
+                       )}
+                       {product.badge && (
+                        <span className={`${product.badge_color || 'bg-[#ff00ff]'} text-white text-[8px] font-bold px-2 py-1 uppercase tracking-widest shadow-lg`}>
+                          {product.badge}
+                        </span>
+                       )}
                     </div>
                   </div>
-                  <div className="flex-1">
-                    <span className="text-[10px] text-[#39ff14] font-bold uppercase tracking-widest">{product.category}</span>
-                    <h3 className="font-heading text-lg mt-1 mb-2 line-clamp-1 text-black dark:text-white">{product.name}</h3>
-                    <span className="text-[#39ff14] font-bold font-sans">{product.price}</span>
+                  <div className="flex-1 flex flex-col">
+                    <h3 className="font-heading text-xl mb-2 text-white uppercase tracking-tighter group-hover:text-[#39ff14] transition-colors">{product.name}</h3>
+                    <div className="flex items-baseline gap-3">
+                      <div className="text-[#39ff14] text-xl font-bold font-sans">{product.price}</div>
+                      {product.old_price && (
+                        <div className="text-white/30 text-sm font-sans line-through">{product.old_price}</div>
+                      )}
+                    </div>
                   </div>
-                  <div className="mt-4 pt-4 border-t border-black/5 dark:border-white/5 flex gap-2">
-                    <button onClick={() => handleEdit(product)} className="flex-1 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 text-black dark:text-white p-2 flex items-center justify-center transition-colors">
-                      <Edit size={16} />
-                    </button>
-                    <button onClick={() => handleDelete(product.id)} className="flex-1 bg-red-900/10 hover:bg-red-900/30 text-red-500 p-2 flex items-center justify-center transition-colors border border-red-500/10">
-                      <Trash2 size={16} />
-                    </button>
+                  <div className="mt-4 pt-4 border-t border-white/5 flex gap-3">
+                    <button onClick={() => handleEdit(product)} className="flex-1 bg-white/5 hover:bg-white/10 text-white p-3 flex items-center justify-center transition-all border border-white/10 hover:border-[#39ff14]/50"><Edit size={18} /></button>
+                    <button onClick={() => handleDelete(product.id)} className="flex-1 bg-red-500/10 hover:bg-red-500/20 text-red-500 p-3 flex items-center justify-center transition-all border border-red-500/20"><Trash2 size={18} /></button>
                   </div>
                 </div>
               ))}
             </div>
-          </motion.div>
+          </div>
         )}
 
         {/* ORDERS TAB */}
         {activeTab === 'orders' && (
-          <motion.div key="orders" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-6">
+          <div key="orders" className="space-y-6">
             <div className="bg-white dark:bg-[#0f0f0f] border border-black/5 dark:border-white/5 p-6 shadow-sm dark:shadow-none">
               <h2 className="text-xl font-heading uppercase tracking-widest text-[#a1a1aa]">Commandes Récentes</h2>
             </div>
@@ -298,7 +386,7 @@ export default function DashboardClient({ initialProducts }: { initialProducts: 
                         <div className="text-xs text-[#525252]">{order.customer_phone}</div>
                       </td>
                       <td className="py-4 px-4">
-                        <div className="text-black dark:text-white text-sm max-w-[200px] truncate" title={order.items_list}>{order.items_list}</div>
+                        <div className="text-black dark:text-white text-sm" title={order.items_list}>{order.items_list}</div>
                         <div className="text-[#39ff14] text-xs font-bold">{order.total_price} DZD</div>
                       </td>
                       <td className="py-4 px-4 hidden sm:table-cell text-xs text-[#a1a1aa]">{order.customer_wilaya}</td>
@@ -316,7 +404,7 @@ export default function DashboardClient({ initialProducts }: { initialProducts: 
                         <div className="flex justify-start sm:justify-end gap-1 sm:gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity mt-2 sm:mt-0">
                           <button onClick={() => handleUpdateOrderStatus(order.id, 'Confirmée')} title="Confirmer" className="p-1 sm:p-2 bg-[#39ff14]/10 sm:bg-transparent hover:bg-[#39ff14]/20 text-[#39ff14] border border-[#39ff14]/20 sm:border-black/5 sm:dark:border-white/5"><CheckCircle2 size={16} /></button>
                           <button onClick={() => handleUpdateOrderStatus(order.id, 'Livrée')} title="Livrée" className="p-1 sm:p-2 bg-black/5 dark:bg-white/5 sm:bg-transparent hover:bg-black/10 dark:hover:bg-white/10 text-black dark:text-white border border-black/10 dark:border-white/10 sm:border-black/5 sm:dark:border-white/5"><Truck size={16} /></button>
-                          <button onClick={() => handleUpdateOrderStatus(order.id, 'Annulée')} title="Annuler" className="p-1 sm:p-2 bg-red-500/10 sm:bg-transparent hover:bg-red-500/20 text-red-500 border border-red-500/20 sm:border-black/5 sm:dark:border-white/5"><XCircle size={16} /></button>
+                          <button onClick={() => handleDeleteOrder(order.id)} title="Supprimer définitivement" className="p-1 sm:p-2 bg-red-900/10 sm:bg-transparent hover:bg-red-500/20 text-red-500 border border-red-500/20 sm:border-black/5 sm:dark:border-white/5"><Trash2 size={16} /></button>
                         </div>
                       </td>
                     </tr>
@@ -327,51 +415,53 @@ export default function DashboardClient({ initialProducts }: { initialProducts: 
                 </tbody>
               </table>
             </div>
-          </motion.div>
+          </div>
         )}
 
         {/* STATS TAB */}
         {activeTab === 'stats' && (
           <motion.div key="stats" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-white dark:bg-[#0f0f0f] border border-black/5 dark:border-white/5 p-8 relative overflow-hidden group shadow-sm dark:shadow-none">
-                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity"><DollarSign size={80} /></div>
-                <h3 className="text-xs font-bold text-[#525252] uppercase tracking-[0.3em] mb-2">Chiffre d'Affaires</h3>
-                <div className="text-4xl font-heading text-[#39ff14]">{stats?.totalRevenue?.toLocaleString() || 0} DZD</div>
+              <div className="bg-[#050505] border border-white/5 p-8 relative overflow-hidden group shadow-2xl">
+                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity"><DollarSign size={80} className="text-[#39ff14]" /></div>
+                <h3 className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3em] mb-4">Chiffre d'Affaires</h3>
+                <div className="text-4xl font-heading text-[#39ff14] tracking-tighter">{stats?.totalRevenue?.toLocaleString() || 0} DZD</div>
               </div>
-              <div className="bg-white dark:bg-[#0f0f0f] border border-black/5 dark:border-white/5 p-8 relative overflow-hidden group shadow-sm dark:shadow-none">
-                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity"><Package size={80} /></div>
-                <h3 className="text-xs font-bold text-[#525252] uppercase tracking-[0.3em] mb-2">Total Commandes</h3>
-                <div className="text-4xl font-heading text-black dark:text-white">{stats?.totalOrders || 0}</div>
+              <div className="bg-[#050505] border border-white/5 p-8 relative overflow-hidden group shadow-2xl">
+                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity"><Package size={80} className="text-white" /></div>
+                <h3 className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3em] mb-4">Total Commandes</h3>
+                <div className="text-4xl font-heading text-white tracking-tighter">{stats?.totalOrders || 0}</div>
               </div>
-              <div className="bg-white dark:bg-[#0f0f0f] border border-black/5 dark:border-white/5 p-8 relative overflow-hidden group shadow-sm dark:shadow-none">
-                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity"><TrendingUp size={80} /></div>
-                <h3 className="text-xs font-bold text-[#525252] uppercase tracking-[0.3em] mb-2">Total Produits</h3>
-                <div className="text-4xl font-heading text-black dark:text-white">{stats?.productsCount || 0}</div>
+              <div className="bg-[#050505] border border-white/5 p-8 relative overflow-hidden group shadow-2xl">
+                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity"><TrendingUp size={80} className="text-white" /></div>
+                <h3 className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3em] mb-4">Total Produits</h3>
+                <div className="text-4xl font-heading text-white tracking-tighter">{stats?.productsCount || 0}</div>
               </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white dark:bg-[#0f0f0f] border border-black/5 dark:border-white/5 p-6 shadow-sm dark:shadow-none">
-                <h3 className="text-sm font-bold text-black dark:text-white uppercase tracking-widest mb-6 flex items-center gap-2">
-                  <Eye size={18} className="text-[#39ff14]" /> Les plus regardés
+              <div className="bg-[#050505] border border-white/5 p-8 relative overflow-hidden group shadow-2xl">
+                <h3 className="text-sm font-bold text-white uppercase tracking-[0.3em] mb-10 flex items-center gap-3">
+                  <Eye size={20} className="text-[#39ff14]" /> 
+                  Performances produits
                 </h3>
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {stats?.mostViewed?.map((p: any, i: number) => (
-                    <div key={i} className="flex items-center justify-between group">
-                      <div className="flex items-center gap-3">
-                        <span className="text-xs font-bold text-[#262626]">0{i+1}</span>
-                        <div className="text-sm font-bold text-[#a1a1aa] group-hover:text-black dark:group-hover:text-white transition-colors">{p.name}</div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="h-1 w-24 bg-black/5 dark:bg-white/5 rounded-full overflow-hidden">
-                          <motion.div 
-                            initial={{ width: 0 }}
-                            animate={{ width: `${(p.views_count / (stats.mostViewed[0].views_count || 1)) * 100}%` }}
-                            className="h-full bg-[#39ff14]"
-                          />
+                    <div key={i} className="flex flex-col gap-2 group/item">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <span className="text-[10px] font-bold text-white/20 group-hover/item:text-[#39ff14] transition-colors">0{i+1}</span>
+                          <div className="text-sm font-bold text-white/60 group-hover/item:text-white transition-colors uppercase tracking-tight">{p.name}</div>
                         </div>
-                        <span className="text-[10px] font-bold text-[#39ff14]">{p.views_count}</span>
+                        <span className="text-xs font-bold text-[#39ff14] font-sans">{p.views_count} <span className="text-[9px] text-[#39ff14]/40">VUES</span></span>
+                      </div>
+                      <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: `${(p.views_count / (stats.mostViewed[0].views_count || 1)) * 100}%` }}
+                          transition={{ duration: 1, ease: "easeOut" }}
+                          className="h-full bg-gradient-to-r from-[#39ff14]/20 to-[#39ff14] shadow-[0_0_10px_rgba(57,255,20,0.3)]"
+                        />
                       </div>
                     </div>
                   ))}
@@ -423,67 +513,323 @@ export default function DashboardClient({ initialProducts }: { initialProducts: 
       <AnimatePresence>
         {isModalOpen && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsModalOpen(false)} className="absolute inset-0 bg-white/80 dark:bg-black/80 backdrop-blur-sm" />
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="w-full max-w-2xl bg-white dark:bg-[#0f0f0f] border border-black/10 dark:border-white/10 p-5 sm:p-8 relative overflow-y-auto max-h-[90vh] shadow-2xl">
-              <div className="flex justify-between items-center mb-6 sm:mb-8">
-                <h2 className="text-xl sm:text-2xl font-heading uppercase tracking-tighter text-black dark:text-white">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsModalOpen(false)} className="absolute inset-0 bg-black/60 backdrop-blur-md" />
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="w-full max-w-4xl bg-black border border-white/10 p-6 sm:p-10 relative overflow-y-auto max-h-[95vh] shadow-2xl rounded-sm">
+              
+              <div className="flex justify-between items-center mb-8">
+                <h2 className="text-3xl font-heading uppercase tracking-widest text-[#39ff14]">
                   {editingProduct ? 'MODIFIER LE PRODUIT' : 'AJOUTER UN PRODUIT'}
                 </h2>
-                <button onClick={() => setIsModalOpen(false)} className="text-[#a1a1aa] hover:text-black dark:hover:text-white"><X size={24} /></button>
+                <button onClick={() => setIsModalOpen(false)} className="text-white/40 hover:text-white transition-colors"><X size={32} /></button>
               </div>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-[10px] font-bold text-[#a1a1aa] uppercase tracking-widest mb-1">Nom du Produit</label>
-                        <input type="text" required value={formData.name} onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))} className="w-full bg-gray-50 dark:bg-black border border-black/10 dark:border-white/10 px-4 py-2 text-sm text-black dark:text-white focus:border-[#39ff14] dark:focus:border-[#39ff14] outline-none" />
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-bold text-[#a1a1aa] uppercase tracking-widest mb-1">Catégorie</label>
-                        <select value={formData.category} onChange={e => setFormData(prev => ({ ...prev, category: e.target.value }))} className="w-full bg-gray-50 dark:bg-black border border-black/10 dark:border-white/10 px-4 py-2 text-sm text-black dark:text-white focus:border-[#39ff14] dark:focus:border-[#39ff14] outline-none">
-                          <option value="Snus">Snus</option>
-                          <option value="Vape Jetable">Vape Jetable</option>
-                          <option value="Puff">Puff</option>
-                          <option value="E-Liquides">E-Liquides</option>
-                        </select>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-[10px] font-bold text-[#a1a1aa] uppercase tracking-widest mb-1">Prix (DZD)</label>
-                          <input type="text" required value={formData.price} placeholder="1 600 DZD" onChange={e => setFormData(prev => ({ ...prev, price: e.target.value }))} className="w-full bg-gray-50 dark:bg-black border border-black/10 dark:border-white/10 px-4 py-2 text-sm text-black dark:text-white focus:border-[#39ff14] dark:focus:border-[#39ff14] outline-none" />
-                        </div>
-                        <div>
-                          <label className="block text-[10px] font-bold text-[#a1a1aa] uppercase tracking-widest mb-1">Ancien Prix</label>
-                          <input type="text" value={formData.old_price} placeholder="1 900 DZD" onChange={e => setFormData(prev => ({ ...prev, old_price: e.target.value }))} className="w-full bg-gray-50 dark:bg-black border border-black/10 dark:border-white/10 px-4 py-2 text-sm text-black dark:text-white focus:border-[#39ff14] dark:focus:border-[#39ff14] outline-none" />
-                        </div>
-                      </div>
+
+              <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-[10px] font-bold text-[#a1a1aa] uppercase tracking-[0.2em] mb-2">Nom du Produit</label>
+                    <input type="text" required value={formData.name} placeholder="p.ex. TORNADO 9000" onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))} className="w-full bg-[#111] border border-white/10 px-4 py-3 text-sm text-white focus:border-[#39ff14] outline-none transition-colors" />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-[#a1a1aa] uppercase tracking-[0.2em] mb-2">Description du Produit</label>
+                    <textarea rows={3} value={formData.description} onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))} className="w-full bg-[#111] border border-white/10 px-4 py-3 text-sm text-white focus:border-[#39ff14] outline-none transition-colors resize-none" placeholder="Décrivez le produit en détail..." />
+                  </div>
+
+                  {/* Category Field */}
+                  <div className="mb-6">
+                    <div className="flex items-center justify-between mb-2">
+                       <label className="text-[10px] font-bold text-[#a1a1aa] uppercase tracking-[0.2em]">Catégorie</label>
+                       <button 
+                         type="button" 
+                         onClick={() => setIsAddingNewCategory(!isAddingNewCategory)}
+                         className="text-[#39ff14] hover:bg-[#39ff14]/10 p-1 rounded transition-colors"
+                         title={isAddingNewCategory ? "Choisir existante" : "Ajouter nouvelle"}
+                       >
+                         {isAddingNewCategory ? <X size={14} /> : <Plus size={14} />}
+                       </button>
                     </div>
-                    <div className="space-y-4">
-                      <label className="block text-[10px] font-bold text-[#a1a1aa] uppercase tracking-widest mb-1">Image</label>
-                      <div className="space-y-3">
-                        {(uploadedUrl || formData.image_url) && (
-                          <div className="relative aspect-square w-32 mx-auto bg-gray-100 dark:bg-black border border-black/10 dark:border-white/10 p-2">
-                             <img src={uploadedUrl || formData.image_url} className="w-full h-full object-contain" alt="Preview" />
-                             <button type="button" onClick={() => { setUploadedUrl(''); setFormData(prev => ({ ...prev, image_url: '' })) }} className="absolute -top-2 -right-2 bg-red-500 rounded-full p-1"><X size={12} className="text-white" /></button>
-                          </div>
-                        )}
-                        <div className="relative h-32 w-full border-2 border-dashed border-black/10 dark:border-white/10 rounded-sm flex flex-col items-center justify-center hover:border-[#39ff14]/50 transition-colors group">
-                          {uploading ? (
-                            <div className="w-6 h-6 border-2 border-[#39ff14] border-t-transparent rounded-full animate-spin"></div>
-                          ) : (
+                    {isAddingNewCategory ? (
+                      <input 
+                        type="text" 
+                        required 
+                        value={formData.category} 
+                        placeholder="Ex: Accessoires, E-liquide..." 
+                        onChange={e => setFormData(prev => ({ ...prev, category: e.target.value }))} 
+                        className="w-full bg-[#111] border border-[#39ff14]/50 px-4 py-3 text-sm text-white focus:border-[#39ff14] outline-none transition-colors" 
+                      />
+                    ) : (
+                      <select 
+                        value={formData.category} 
+                        onChange={e => setFormData(prev => ({ ...prev, category: e.target.value }))}
+                        className="w-full bg-[#111] border border-white/10 px-4 py-3 text-sm text-white focus:border-[#39ff14] outline-none transition-colors appearance-none cursor-pointer"
+                      >
+                         {Array.from(new Set([...DEFAULT_CATEGORIES, ...products.map(p => p.category)])).map(cat => (
+                           <option key={cat} value={cat}>{cat}</option>
+                         ))}
+                         {formData.category && !Array.from(new Set([...DEFAULT_CATEGORIES, ...products.map(p => p.category)])).includes(formData.category) && (
+                           <option value={formData.category}>{formData.category}</option>
+                         )}
+                      </select>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-[10px] font-bold text-[#a1a1aa] uppercase tracking-[0.2em] mb-2">Prix de Vente (DZD)</label>
+                      <input type="text" required value={formData.price} placeholder="1 600 DZD" onChange={e => setFormData(prev => ({ ...prev, price: e.target.value }))} className="w-full bg-[#111] border border-white/10 px-4 py-3 text-sm text-white focus:border-[#39ff14] outline-none transition-colors" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-[#a1a1aa] uppercase tracking-[0.2em] mb-2">Ancien Prix (DZD)</label>
+                      <input 
+                        type="text" 
+                        value={formData.old_price} 
+                        placeholder="2 000 DZD" 
+                        onChange={e => {
+                          const val = e.target.value;
+                          setFormData(prev => ({ 
+                            ...prev, 
+                            old_price: val,
+                            // Auto-set promo badge if entering price and badge is empty
+                            badge: (val && !prev.badge) ? 'PROMO 🔥' : prev.badge,
+                            badge_color: (val && !prev.badge_color) ? 'bg-[#ef4444]' : prev.badge_color
+                          }))
+                        }} 
+                        className="w-full bg-[#111] border border-white/10 px-4 py-3 text-sm text-white focus:border-[#39ff14] outline-none transition-colors" 
+                      />
+                    </div>
+                  </div>
+
+                  {/* Flavors Section */}
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <label className="text-[10px] font-bold text-[#a1a1aa] uppercase tracking-[0.2em]">Goûts (Options)</label>
+                      <button 
+                        type="button" 
+                        onClick={() => setFormData(prev => ({ ...prev, flavors: [...prev.flavors, { name: '', detail: '' }] }))}
+                        className="text-[#39ff14] hover:bg-[#39ff14]/10 p-1.5 rounded transition-colors flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest"
+                      >
+                        <Plus size={16} /> Ajouter
+                      </button>
+                    </div>
+
+                    <div className="space-y-3 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                      {formData.flavors.map((flavor, index) => (
+                        <div key={index} className="flex gap-2">
+                          <button 
+                            type="button" 
+                            onClick={() => setFormData(prev => ({ ...prev, flavors: prev.flavors.filter((_, i) => i !== index) }))}
+                            className="p-3 text-white/30 hover:text-red-500 transition-colors"
+                          >
+                            <X size={20} />
+                          </button>
+                          <input 
+                            type="text" 
+                            value={flavor.name} 
+                            placeholder="Menthe"
+                            onChange={(e) => {
+                              const newFlavors = [...formData.flavors];
+                              newFlavors[index].name = e.target.value;
+                              setFormData(prev => ({ ...prev, flavors: newFlavors }));
+                            }} 
+                            className="bg-[#111] border border-white/10 px-4 py-3 text-sm text-white focus:border-[#39ff14] outline-none transition-colors flex-[2]" 
+                          />
+                          <input 
+                            type="text" 
+                            value={flavor.detail} 
+                            placeholder="p.ex. 20 g"
+                            onChange={(e) => {
+                              const newFlavors = [...formData.flavors];
+                              newFlavors[index].detail = e.target.value;
+                              setFormData(prev => ({ ...prev, flavors: newFlavors }));
+                            }} 
+                            className="bg-[#111] border border-white/10 px-4 py-3 text-sm text-white focus:border-[#39ff14] outline-none transition-colors flex-1" 
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Column */}
+                <div className="space-y-8">
+                  {/* Média Section */}
+                  <div>
+                    <h3 className="text-[10px] font-bold text-[#a1a1aa] uppercase tracking-[0.2em] mb-4">Galerie Photo (1-5)</h3>
+                    <div className="grid grid-cols-5 gap-2 mb-6">
+                      {[0, 1, 2, 3, 4].map((index) => (
+                        <div key={index} className="relative aspect-square bg-[#111] border border-white/5 group overflow-hidden flex items-center justify-center">
+                          {formData.images[index] ? (
                             <>
-                              <Upload className="text-[#525252] group-hover:text-[#39ff14] mb-2" size={24} />
-                              <span className="text-[10px] text-[#525252] font-bold uppercase">Upload</span>
-                              <input type="file" accept="image/*" onChange={handleUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
+                              <img src={formData.images[index]} className="w-full h-full object-contain" alt={`Photo ${index + 1}`} />
+                              <button 
+                                type="button" 
+                                onClick={() => setFormData(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }))}
+                                className="absolute top-1 right-1 bg-red-500/80 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                              >
+                                <X size={10} className="text-white" />
+                              </button>
                             </>
+                          ) : (
+                            <label className="w-full h-full flex items-center justify-center cursor-pointer hover:bg-white/[0.02] transition-colors">
+                              <Plus size={20} className={`text-white/10 group-hover:text-[#39ff14] transition-colors ${uploading ? 'animate-pulse' : ''}`} />
+                              <input 
+                                type="file" 
+                                accept="image/*" 
+                                onChange={(e) => handleUpload(e)} 
+                                className="hidden" 
+                                disabled={uploading}
+                              />
+                            </label>
                           )}
                         </div>
+                      ))}
+                    </div>
+
+                    <h3 className="text-[10px] font-bold text-[#a1a1aa] uppercase tracking-[0.2em] mb-4">Vidéo du Produit</h3>
+                    <div className="relative aspect-video bg-[#111] border border-white/5 overflow-hidden flex items-center justify-center group">
+                      {formData.video_url ? (
+                        <div className="w-full h-full relative">
+                          <video src={formData.video_url} className="w-full h-full object-cover opacity-50" />
+                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <Play size={40} className="text-white/20 group-hover:text-[#39ff14] transition-colors" />
+                          </div>
+                          <button 
+                             type="button" 
+                             onClick={() => setFormData(prev => ({ ...prev, video_url: '' }))}
+                             className="absolute top-2 right-2 bg-red-500 p-1.5 rounded-full z-20 hover:scale-110 transition-transform shadow-lg"
+                          >
+                             <X size={14} className="text-white" />
+                          </button>
+                        </div>
+                      ) : (
+                        <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-white/[0.02] transition-colors p-8">
+                           <Upload size={32} className="text-[#a1a1aa] group-hover:text-[#39ff14] mb-4 transition-colors" />
+                           <span className="text-[10px] font-bold text-[#a1a1aa] group-hover:text-white uppercase tracking-[0.2em] transition-colors">Ajouter une vidéo</span>
+                           <input type="file" accept="video/*" onChange={(e) => handleUpload(e, true)} className="hidden" disabled={uploading} />
+                        </label>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-[10px] font-bold text-[#a1a1aa] uppercase tracking-[0.2em] mb-4">Marketing & Style</h3>
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <label className="text-[10px] font-bold text-white/40 uppercase">Badge Texte</label>
+                          <button type="button" onClick={() => setIsAddingNewBadgeText(!isAddingNewBadgeText)} className="text-[#39ff14] hover:bg-[#39ff14]/10 p-1 rounded transition-colors">
+                            {isAddingNewBadgeText ? <X size={12} /> : <Plus size={12} />}
+                          </button>
+                        </div>
+                        {isAddingNewBadgeText ? (
+                          <input type="text" value={formData.badge} placeholder="ex: -15%" onChange={e => setFormData(prev => ({ ...prev, badge: e.target.value }))} className="w-full bg-[#111] border border-[#39ff14]/50 px-4 py-3 text-sm text-white focus:border-[#39ff14] outline-none transition-colors" />
+                        ) : (
+                          <select value={formData.badge} onChange={e => setFormData(prev => ({ ...prev, badge: e.target.value }))} className="w-full bg-[#111] border border-white/10 px-4 py-3 text-sm text-white focus:border-[#39ff14] outline-none transition-colors appearance-none cursor-pointer">
+                            <option value="">Aucun Badge</option>
+                            <option value="NOUVEAU">NOUVEAU</option>
+                            <option value="PROMO 🔥">PROMO 🔥</option>
+                            <option value="TOP VENTE">TOP VENTE</option>
+                            <option value="STOCK LIMITÉ">STOCK LIMITÉ</option>
+                            <option value="OFFRE SPÉCIALE">OFFRE SPÉCIALE</option>
+                            {formData.badge && !['', 'NOUVEAU', 'PROMO 🔥', 'TOP VENTE', 'STOCK LIMITÉ', 'OFFRE SPÉCIALE'].includes(formData.badge) && (
+                              <option value={formData.badge}>{formData.badge}</option>
+                            )}
+                          </select>
+                        )}
+                      </div>
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <label className="text-[10px] font-bold text-white/40 uppercase">Couleur Badge</label>
+                          <button type="button" onClick={() => setIsAddingNewBadgeColor(!isAddingNewBadgeColor)} className="text-[#39ff14] hover:bg-[#39ff14]/10 p-1 rounded transition-colors">
+                            {isAddingNewBadgeColor ? <X size={12} /> : <Plus size={12} />}
+                          </button>
+                        </div>
+                        {isAddingNewBadgeColor ? (
+                          <input type="text" value={formData.badge_color} placeholder="bg-[#ff00ff]" onChange={e => setFormData(prev => ({ ...prev, badge_color: e.target.value }))} className="w-full bg-[#111] border border-[#39ff14]/50 px-4 py-3 text-sm text-white focus:border-[#39ff14] outline-none transition-colors" />
+                        ) : (
+                          <select value={formData.badge_color} onChange={e => setFormData(prev => ({ ...prev, badge_color: e.target.value }))} className="w-full bg-[#111] border border-white/10 px-4 py-3 text-sm text-white focus:border-[#39ff14] outline-none transition-colors appearance-none cursor-pointer">
+                            <option value="bg-[#ef4444]">Rouge Mat</option>
+                            <option value="bg-[#39ff14] text-black">Vert Néon</option>
+                            <option value="bg-[#ff00ff]">Magenta Flash</option>
+                            <option value="bg-yellow-500 text-black">Jaune Soleil</option>
+                            <option value="bg-white text-black">Blanc Classique</option>
+                            {formData.badge_color && !['bg-[#ef4444]', 'bg-[#39ff14] text-black', 'bg-[#ff00ff]', 'bg-yellow-500 text-black', 'bg-white text-black'].includes(formData.badge_color) && (
+                              <option value={formData.badge_color}>{formData.badge_color}</option>
+                            )}
+                          </select>
+                        )}
                       </div>
                     </div>
-                 </div>
-                 <button type="submit" disabled={isPending || uploading} className="w-full bg-[#39ff14] text-black font-heading py-4 mt-4 uppercase hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors disabled:opacity-50">
-                  {isPending ? 'Enregistrement...' : editingProduct ? 'Mettre à jour' : 'Créer'}
-                </button>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <label className="text-[10px] font-bold text-white/40 uppercase">Couleur Effet Glow</label>
+                          <button type="button" onClick={() => setIsAddingNewGlow(!isAddingNewGlow)} className="text-[#39ff14] hover:bg-[#39ff14]/10 p-1 rounded transition-colors">
+                            {isAddingNewGlow ? <X size={12} /> : <Plus size={12} />}
+                          </button>
+                        </div>
+                        {isAddingNewGlow ? (
+                          <input type="text" value={formData.glow_color} placeholder="box-glow-green-hover" onChange={e => setFormData(prev => ({ ...prev, glow_color: e.target.value }))} className="w-full bg-[#111] border border-[#39ff14]/50 px-4 py-3 text-sm text-white focus:border-[#39ff14] outline-none transition-colors" />
+                        ) : (
+                          <select value={formData.glow_color} onChange={e => setFormData(prev => ({ ...prev, glow_color: e.target.value }))} className="w-full bg-[#111] border border-white/10 px-4 py-3 text-sm text-white focus:border-[#39ff14] outline-none transition-colors appearance-none cursor-pointer">
+                            <option value="box-glow-green-hover">Glow Vert</option>
+                            <option value="box-glow-pink-hover">Glow Magenta</option>
+                            <option value="box-glow-yellow-hover">Glow Jaune</option>
+                            <option value="box-glow-red-hover">Glow Rouge</option>
+                            {formData.glow_color && !['box-glow-green-hover', 'box-glow-pink-hover', 'box-glow-yellow-hover', 'box-glow-red-hover'].includes(formData.glow_color) && (
+                              <option value={formData.glow_color}>{formData.glow_color}</option>
+                            )}
+                          </select>
+                        )}
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-white/40 uppercase mb-2">Quantité Disponible</label>
+                        <input type="number" value={formData.stock_quantity} onChange={e => setFormData(prev => ({ ...prev, stock_quantity: parseInt(e.target.value) }))} className="w-full bg-[#111] border border-white/10 px-4 py-3 text-sm text-white focus:border-[#39ff14] outline-none transition-colors" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-[10px] font-bold text-[#a1a1aa] uppercase tracking-[0.2em] mb-4">Restrictions et Visibilité</h3>
+                    <div className="space-y-4 bg-white/[0.02] border border-white/5 p-4 rounded-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-white uppercase tracking-widest">Visible dans la boutique</span>
+                        <button 
+                          type="button"
+                          onClick={() => setFormData(prev => ({ ...prev, is_visible: !prev.is_visible }))}
+                          className={`w-12 h-6 rounded-full relative transition-colors ${formData.is_visible ? 'bg-[#39ff14]' : 'bg-white/10'}`}
+                        >
+                          <motion.div animate={{ x: formData.is_visible ? 26 : 4 }} className="absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm" />
+                        </button>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <input 
+                          type="checkbox" 
+                          id="ageLimit"
+                          checked={formData.is_18_plus} 
+                          onChange={e => setFormData(prev => ({ ...prev, is_18_plus: e.target.checked }))} 
+                          className="w-5 h-5 accent-[#39ff14] bg-[#111] border-white/10 rounded cursor-pointer"
+                        />
+                        <label htmlFor="ageLimit" className="text-[10px] font-bold text-white/60 uppercase tracking-widest cursor-pointer">Vente interdite aux moins de 18 ans.</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer Action */}
+                <div className="lg:col-span-2 pt-6">
+                  <button 
+                    disabled={isPending}
+                    type="submit" 
+                    className={`w-full bg-[#39ff14] hover:bg-[#32e612] text-black font-heading text-xl py-5 uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(57,255,20,0.2)] flex items-center justify-center gap-3 ${isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {isPending ? (
+                      <div className="w-6 h-6 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      editingProduct ? 'Enregistrer les modifications' : 'Créer le produit'
+                    )}
+                  </button>
+                </div>
               </form>
             </motion.div>
           </div>

@@ -6,6 +6,7 @@ import { Footer } from '../../components/Footer';
 import { ShoppingCart, Percent, Tag } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import Link from 'next/link';
 import { createClient } from '../../utils/supabase/client';
 import { useCart } from '../../context/CartContext';
 
@@ -19,6 +20,7 @@ interface Product {
   badge: string;
   badgeColor: string;
   glowColor: string;
+  flavors?: (string | { name: string; detail: string })[];
 }
 
 const fallbackPromos: Product[] = [
@@ -28,6 +30,7 @@ const fallbackPromos: Product[] = [
 
 export default function Promos() {
   const [products, setProducts] = useState<Product[]>(fallbackPromos);
+  const [selectedFlavors, setSelectedFlavors] = useState<Record<number, string>>({});
   const { addToCart } = useCart();
 
   useEffect(() => {
@@ -53,7 +56,8 @@ export default function Promos() {
             image: item.image_url,
             badge: item.badge || 'PROMO 🔥',
             badgeColor: item.badge_color || 'bg-[#ef4444]',
-            glowColor: item.glow_color || 'box-glow-green-hover'
+            glowColor: item.glow_color || 'box-glow-green-hover',
+            flavors: item.flavors || []
           }));
           setProducts(mappedData);
         }
@@ -130,9 +134,11 @@ export default function Promos() {
                     />
                   </div>
 
-                  <div className="flex-1 flex flex-col">
+                  <div className="flex-1">
                     <span className="text-xs text-[#a1a1aa] font-bold tracking-widest uppercase mb-1">{product.category}</span>
-                    <h3 className="font-heading text-xl sm:text-2xl text-black dark:text-white mb-3">{product.name}</h3>
+                    <Link href={`/product/${product.id}`} className="block group/link">
+                      <h3 className="font-heading text-xl sm:text-2xl text-black dark:text-white mb-3 group-hover/link:text-[#39ff14] transition-colors">{product.name}</h3>
+                    </Link>
                     
                     {/* Prix avec barré */}
                     <div className="flex items-center gap-3 mb-6">
@@ -141,14 +147,27 @@ export default function Promos() {
                         <span className="text-base font-bold font-sans text-[#ef4444] line-through">{product.oldPrice}</span>
                       )}
                     </div>
+                  </div>
 
-                    <button 
-                      onClick={() => addToCart(product)}
-                      className="mt-auto w-full bg-[#ef4444] text-white font-heading text-lg py-3 flex items-center justify-center gap-2 uppercase hover:bg-[#dc2626] transition-colors active:scale-95"
-                    >
-                      <ShoppingCart size={20} />
-                      Profiter de l'offre
-                    </button>
+                  <div className="flex flex-col gap-2 relative z-10 pt-4 border-t border-black/5 dark:border-white/5">
+                    <div className="flex gap-2">
+                      <Link href={`/product/${product.id}`} className="flex-1 bg-white/5 hover:bg-white/10 dark:bg-white/5 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 text-black dark:text-white font-heading py-2 text-center text-xs uppercase tracking-widest transition-all">
+                        Voir Détails
+                      </Link>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const firstFlavor = product.flavors?.[0];
+                          const flavor = typeof firstFlavor === 'string' 
+                            ? firstFlavor 
+                            : (firstFlavor as any)?.name || '';
+                          addToCart(product as any, flavor);
+                        }}
+                        className="flex-1 bg-[#39ff14] hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black text-black font-heading py-2 text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(57,255,20,0.1)]"
+                      >
+                        <ShoppingCart size={14} /> Acheter
+                      </button>
+                    </div>
                   </div>
                 </motion.div>
               ))}
