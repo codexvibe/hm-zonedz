@@ -63,17 +63,20 @@ const DEFAULT_CATEGORIES = [
 export default function Shop() {
   const [activeCategory, setActiveCategory] = useState('Toutes');
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
-  const [products, setProducts] = useState<Product[]>(fallbackProducts);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedFlavors, setSelectedFlavors] = useState<Record<number, string>>({});
   const { addToCart } = useCart();
 
   // Extraire le nombre d'un string prix comme "1 500 DZD"
   const parsePrice = (priceStr: string): number => {
     if (!priceStr) return 0;
-    return parseInt(priceStr.replace(/\s/g, '').replace(/[^0-9]/g, ''), 10) || 0;
+    // Supprime les espaces et tout ce qui n'est pas un chiffre
+    const numeric = priceStr.toString().replace(/\s/g, '').replace(/[^0-9]/g, '');
+    return parseInt(numeric, 10) || 0;
   };
 
-  const [priceRange, setPriceRange] = useState<number>(5000);
+  const [priceRange, setPriceRange] = useState<number>(30000);
 
   const checkCategoryHasProducts = (cat: string) => {
     if (cat === 'Toutes') return true;
@@ -91,8 +94,10 @@ export default function Shop() {
 
   useEffect(() => {
     const fetchProducts = async () => {
-      // Si les clés Supabase ne sont pas configurées, on garde le fallback
+      setIsLoading(true);
       if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'YOUR_SUPABASE_URL') {
+        setProducts(fallbackProducts);
+        setIsLoading(false);
         return;
       }
       
@@ -123,6 +128,9 @@ export default function Shop() {
         }
       } catch (err) {
         console.error('Erreur Supabase, fallback utilisé:', err);
+        setProducts(fallbackProducts);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -163,7 +171,6 @@ export default function Shop() {
           </div>
 
           <div className="flex flex-col md:flex-row gap-8">
-            {/* Sidebar Filters (Desktop) */}
             <aside className="hidden md:block w-64 shrink-0">
               <div className="sticky top-40 bg-white dark:bg-[#0f0f0f] border border-black/10 dark:border-white/10 p-6">
                 <h3 className="font-heading text-2xl text-black dark:text-white mb-6 flex items-center gap-2 uppercase">
@@ -185,7 +192,7 @@ export default function Shop() {
                       </button>
                     </li>
                   ))}
-              {/* Price Range Slider */}
+                </ul>
               <div className="mt-8 pt-6 border-t border-black/10 dark:border-white/10">
                 <h3 className="font-heading text-lg text-black dark:text-white mb-4 flex items-center gap-2 uppercase">
                   <span className="text-[#39ff14] text-sm">💰</span>
@@ -199,27 +206,27 @@ export default function Shop() {
                   <input
                     type="range"
                     min={0}
-                    max={5000}
-                    step={100}
+                    max={30000}
+                    step={500}
                     value={priceRange}
                     onChange={e => setPriceRange(Number(e.target.value))}
                     className="w-full h-1 rounded-full appearance-none cursor-pointer"
                     style={{
-                      background: `linear-gradient(to right, #39ff14 0%, #39ff14 ${(priceRange / 5000) * 100}%, rgba(255,255,255,0.1) ${(priceRange / 5000) * 100}%, rgba(255,255,255,0.1) 100%)`,
+                      background: `linear-gradient(to right, #39ff14 0%, #39ff14 ${(priceRange / 30000) * 100}%, rgba(255,255,255,0.1) ${(priceRange / 30000) * 100}%, rgba(255,255,255,0.1) 100%)`,
                     }}
                   />
                 </div>
                 <div className="flex justify-between text-[10px] text-gray-400 mt-2 font-bold tracking-widest">
                   <span>0</span>
-                  <span>1K</span>
-                  <span>2K</span>
-                  <span>3K</span>
-                  <span>4K</span>
                   <span>5K</span>
+                  <span>10K</span>
+                  <span>15K</span>
+                  <span>20K</span>
+                  <span>30K</span>
                 </div>
-                {priceRange < 5000 && (
+                {priceRange < 30000 && (
                   <button
-                    onClick={() => setPriceRange(5000)}
+                    onClick={() => setPriceRange(30000)}
                     className="mt-3 w-full text-[10px] font-bold text-gray-400 hover:text-[#39ff14] uppercase tracking-widest transition-colors"
                   >
                     ✕ Réinitialiser le filtre
@@ -229,11 +236,22 @@ export default function Shop() {
             </div>
           </aside>
 
-            {/* Product Grid */}
             <div className="flex-1">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <AnimatePresence>
-                  {filteredProducts.map((product) => (
+              {isLoading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <div key={i} className="bg-white/5 border border-white/5 p-4 h-[400px] animate-pulse flex flex-col gap-4">
+                      <div className="w-full h-64 bg-white/5 rounded-sm" />
+                      <div className="w-1/2 h-4 bg-white/5" />
+                      <div className="w-3/4 h-8 bg-white/5" />
+                      <div className="w-full h-10 bg-white/5 mt-auto" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <AnimatePresence>
+                    {filteredProducts.map((product) => (
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
