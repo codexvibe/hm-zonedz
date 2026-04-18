@@ -184,6 +184,9 @@ export default function Shop() {
                         
                         <div className="flex items-center gap-3 mb-6">
                           <span className="text-2xl font-bold font-sans text-[#39ff14]">{product.price}</span>
+                          {product.oldPrice && (
+                            <span className="text-base font-bold font-sans text-[#ef4444] line-through">{product.oldPrice}</span>
+                          )}
                         </div>
 
                         {product.flavors && product.flavors.length > 0 && (
