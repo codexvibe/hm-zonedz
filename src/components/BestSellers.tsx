@@ -59,7 +59,11 @@ export const BestSellers = () => {
             oldPrice: item.old_price,
             image: item.image_url,
             badge: item.badge,
-            badgeColor: item.badge_color,
+            badgeColor: (() => {
+              const c = item.badge_color;
+              if (!c || c.includes('bg-white') || c.includes('bg-gray') || c.includes('bg-slate')) return 'bg-[#ef4444]';
+              return c;
+            })(),
             glowColor: item.glow_color,
             flavors: item.flavors || []
           }));

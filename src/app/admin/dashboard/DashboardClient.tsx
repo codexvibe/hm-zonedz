@@ -748,12 +748,13 @@ export default function DashboardClient({ initialProducts }: { initialProducts: 
                           <input type="text" value={formData.badge_color} placeholder="bg-[#ff00ff]" onChange={e => setFormData(prev => ({ ...prev, badge_color: e.target.value }))} className="w-full bg-[#111] border border-[#39ff14]/50 px-4 py-3 text-sm text-white focus:border-[#39ff14] outline-none transition-colors" />
                         ) : (
                           <select value={formData.badge_color} onChange={e => setFormData(prev => ({ ...prev, badge_color: e.target.value }))} className="w-full bg-[#111] border border-white/10 px-4 py-3 text-sm text-white focus:border-[#39ff14] outline-none transition-colors appearance-none cursor-pointer">
-                            <option value="bg-[#ef4444]">Rouge Mat</option>
-                            <option value="bg-[#39ff14] text-black">Vert Néon</option>
-                            <option value="bg-[#ff00ff]">Magenta Flash</option>
-                            <option value="bg-yellow-500 text-black">Jaune Soleil</option>
-                            <option value="bg-white text-black">Blanc Classique</option>
-                            {formData.badge_color && !['bg-[#ef4444]', 'bg-[#39ff14] text-black', 'bg-[#ff00ff]', 'bg-yellow-500 text-black', 'bg-white text-black'].includes(formData.badge_color) && (
+                            <option value="bg-[#ef4444]">🔴 Rouge Mat</option>
+                            <option value="bg-[#39ff14] text-black">🟢 Vert Néon</option>
+                            <option value="bg-[#ff00ff]">🟣 Magenta Flash</option>
+                            <option value="bg-yellow-500 text-black">🟡 Jaune Soleil</option>
+                            <option value="bg-blue-600">🔵 Bleu Électrique</option>
+                            <option value="bg-orange-500">🟠 Orange Feu</option>
+                          {formData.badge_color && !['bg-[#ef4444]', 'bg-[#39ff14] text-black', 'bg-[#ff00ff]', 'bg-yellow-500 text-black', 'bg-blue-600', 'bg-orange-500'].includes(formData.badge_color) && (
                               <option value={formData.badge_color}>{formData.badge_color}</option>
                             )}
                           </select>
@@ -863,3 +864,4 @@ export default function DashboardClient({ initialProducts }: { initialProducts: 
     </div>
   )
 }
+
