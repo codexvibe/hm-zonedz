@@ -79,7 +79,7 @@ export default function ProductDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#000000] flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-[#000000] flex items-center justify-center">
         <div className="w-12 h-12 border-4 border-[#39ff14] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
@@ -87,7 +87,7 @@ export default function ProductDetail() {
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-[#000000] flex flex-col items-center justify-center text-white">
+      <div className="min-h-screen bg-gray-50 dark:bg-[#000000] flex flex-col items-center justify-center text-black dark:text-white">
         <h1 className="text-4xl font-heading mb-4 uppercase">Produit non trouvé</h1>
         <Link href="/shop" className="text-[#39ff14] hover:underline flex items-center gap-2 uppercase tracking-widest font-bold">
           <ArrowLeft size={16} /> Retour à la boutique
@@ -111,7 +111,7 @@ export default function ProductDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-[#000000] text-white font-sans selection:bg-[#39ff14] selection:text-black">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#000000] text-black dark:text-white font-sans selection:bg-[#39ff14] selection:text-black">
       <Header />
       
       <main className="pt-32 pb-20 overflow-x-hidden">
@@ -120,12 +120,12 @@ export default function ProductDetail() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
             {/* 1. Colonne de galerie (Extrême gauche) */}
-            <div className="lg:col-span-1 border-r border-white/5 pr-4 hidden lg:flex flex-col gap-4">
+            <div className="lg:col-span-1 border-r border-black/10 dark:border-white/5 pr-4 hidden lg:flex flex-col gap-4">
               {galleryItems.map((item, i) => (
                 <button 
                   key={i}
                   onClick={() => setActiveThumb(i)}
-                  className={`relative aspect-square w-full border transition-all duration-300 bg-[#0a0a0a] p-2 group overflow-hidden ${activeThumb === i ? 'border-[#ff00ff] shadow-[0_0_15px_rgba(255,0,255,0.2)]' : 'border-white/10 hover:border-white/30'}`}
+                  className={`relative aspect-square w-full border transition-all duration-300 bg-white dark:bg-[#0a0a0a] p-2 group overflow-hidden ${activeThumb === i ? 'border-[#ff00ff] shadow-[0_0_15px_rgba(255,0,255,0.2)]' : 'border-black/10 hover:border-black/30 dark:border-white/10 dark:hover:border-white/30'}`}
                 >
                   <Image src={item.url} alt={item.label} fill className="object-contain p-1 opacity-70 group-hover:opacity-100 transition-opacity" />
                   {item.type === 'video' && (
@@ -141,7 +141,7 @@ export default function ProductDetail() {
 
             {/* 2. Zone de l'image principale (Centre) */}
             <div className="lg:col-span-6 relative">
-              <div className="relative aspect-[4/5] bg-gradient-to-b from-[#0a0a0a] to-[#000000] border border-white/5 overflow-hidden flex items-center justify-center p-12 lg:p-20">
+              <div className="relative aspect-[4/5] bg-gradient-to-b from-gray-100 to-white dark:from-[#0a0a0a] dark:to-[#000000] border border-black/10 dark:border-white/5 overflow-hidden flex items-center justify-center p-12 lg:p-20">
                 {/* Neon Background Lines */}
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
                   <div className="absolute top-[20%] left-[-10%] w-[120%] h-px bg-[#ff00ff]/20 -rotate-12 blur-sm"></div>
@@ -185,7 +185,7 @@ export default function ProductDetail() {
                 )}
 
                 {/* Bottom Reflective Surface effect */}
-                <div className="absolute bottom-0 left-0 w-full h-1/4 bg-gradient-to-t from-black to-transparent opacity-80 pointer-events-none"></div>
+                <div className="absolute bottom-0 left-0 w-full h-1/4 bg-gradient-to-t from-gray-50 to-transparent dark:from-black dark:to-transparent opacity-80 pointer-events-none"></div>
               </div>
 
               {/* Mobile Gallery (Horizontal) */}
@@ -194,7 +194,7 @@ export default function ProductDetail() {
                   <button 
                     key={i}
                     onClick={() => setActiveThumb(i)}
-                    className={`relative aspect-square w-20 shrink-0 border bg-[#0a0a0a] p-2 ${activeThumb === i ? 'border-[#ff00ff]' : 'border-white/10'}`}
+                    className={`relative aspect-square w-20 shrink-0 border bg-white dark:bg-[#0a0a0a] p-2 ${activeThumb === i ? 'border-[#ff00ff]' : 'border-black/10 dark:border-white/10'}`}
                   >
                     <Image src={item.url} alt={item.label} fill className="object-contain p-1" />
                   </button>
@@ -208,7 +208,7 @@ export default function ProductDetail() {
                 <span className="text-[10px] font-bold text-[#39ff14] uppercase tracking-[0.4em] mb-3 block border-l-2 border-[#39ff14] pl-3">
                   {product.category}
                 </span>
-                <h1 className="text-5xl lg:text-8xl font-heading text-white uppercase leading-none mb-4">
+                <h1 className="text-5xl lg:text-8xl font-heading text-black dark:text-white uppercase leading-none mb-4">
                   {product.name.split(' ').slice(0, 2).join(' ')} <br />
                   <span className="text-[#39ff14] drop-shadow-[0_0_20px_rgba(57,255,20,0.5)]">{product.name.split(' ').slice(2).join(' ')}</span>
                 </h1>
@@ -216,10 +216,10 @@ export default function ProductDetail() {
                 <div className="flex items-center gap-4 mb-10">
                   <div className="flex items-center gap-1">
                     {[1, 2, 3, 4, 5].map(s => (
-                      <Star key={s} size={14} className={s <= 4 ? "fill-[#39ff14] text-[#39ff14]" : "text-white/10 fill-white/10"} />
+                      <Star key={s} size={14} className={s <= 4 ? "fill-[#39ff14] text-[#39ff14]" : "text-black/10 fill-black/10 dark:text-white/10 dark:fill-white/10"} />
                     ))}
                   </div>
-                  <span className="text-xs text-white uppercase tracking-widest font-bold">
+                  <span className="text-xs text-black dark:text-white uppercase tracking-widest font-bold">
                     (4.8) <span className="text-gray-500 ml-2">1 571 AVIS</span>
                   </span>
                 </div>
@@ -236,15 +236,15 @@ export default function ProductDetail() {
                       </span>
                     )}
                   </div>
-                  <div className="inline-flex items-center gap-2 text-[11px] font-bold text-gray-400 uppercase tracking-widest bg-white/5 border border-white/10 px-3 py-1.5">
+                  <div className="inline-flex items-center gap-2 text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest bg-black/5 border border-black/10 dark:bg-white/5 dark:border-white/10 px-3 py-1.5">
                     <CheckCircle2 size={12} className="text-[#39ff14]" />
                     + 350 POINTS DE FIDÉLITÉ
                   </div>
                 </div>
 
                 {/* Specific French Description */}
-                <div className="mb-8 p-6 bg-white/[0.02] border-l-2 border-white/10">
-                  <p className="text-gray-400 text-sm lg:text-base leading-relaxed font-sans">
+                <div className="mb-8 p-6 bg-black/[0.02] dark:bg-white/[0.02] border-l-2 border-black/10 dark:border-white/10">
+                  <p className="text-gray-600 dark:text-gray-400 text-sm lg:text-base leading-relaxed font-sans">
                     {product.description || "Aucune description disponible pour ce produit."}
                   </p>
                 </div>
@@ -262,7 +262,7 @@ export default function ProductDetail() {
               {/* 4. Section de sélection du goût (Goût) */}
               <div className="mb-12">
                 <div className="flex flex-col gap-1 mb-6">
-                  <h3 className="text-2xl font-heading text-white uppercase tracking-widest">GOÛT</h3>
+                  <h3 className="text-2xl font-heading text-black dark:text-white uppercase tracking-widest">GOÛT</h3>
                   <div className="flex items-center gap-2">
                     <span className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">SÉLECTIONNER LE GOÛT:</span>
                     <span className="text-[10px] font-bold text-[#ff00ff] uppercase tracking-[0.2em]">{selectedFlavor} <span className="text-gray-600">(Sélectionné)</span></span>
@@ -280,7 +280,7 @@ export default function ProductDetail() {
                     <button
                       key={flavor.name}
                       onClick={() => setSelectedFlavor(flavor.name)}
-                      className={`relative p-4 border text-left transition-all duration-300 ${selectedFlavor === flavor.name ? 'border-[#ff00ff] bg-[#ff00ff]/10 text-[#ff00ff] shadow-[0_0_15px_rgba(255,0,255,0.1)]' : 'border-white/10 hover:border-white/30 text-white/60 hover:text-white bg-white/[0.02]'}`}
+                      className={`relative p-4 border text-left transition-all duration-300 ${selectedFlavor === flavor.name ? 'border-[#ff00ff] bg-[#ff00ff]/10 text-[#ff00ff] shadow-[0_0_15px_rgba(255,0,255,0.1)]' : 'border-black/10 hover:border-black/30 text-black/60 hover:text-black bg-black/[0.02] dark:border-white/10 dark:hover:border-white/30 dark:text-white/60 dark:hover:text-white dark:bg-white/[0.02]'}`}
                     >
                       <span className="text-sm font-bold uppercase tracking-widest block text-inherit">{flavor.name}</span>
                       {flavor.detail && <span className="text-xs text-gray-400 block mt-1">{flavor.detail}</span>}
@@ -291,7 +291,7 @@ export default function ProductDetail() {
 
 
               {/* 6. Bouton d'appel à l'action final */}
-              <div className="sticky bottom-0 lg:relative pt-8 bg-black/80 backdrop-blur-md lg:bg-transparent z-40">
+              <div className="sticky bottom-0 lg:relative pt-8 bg-gray-50/80 dark:bg-black/80 backdrop-blur-md lg:bg-transparent z-40">
                 <button 
                   onClick={() => addToCart(product as any, selectedFlavor)}
                   className="w-full bg-[#39ff14] hover:bg-[#32e612] active:scale-[0.98] text-black font-heading text-xl py-6 flex items-center justify-center gap-4 uppercase tracking-[0.2em] font-bold transition-all shadow-[0_0_40px_rgba(57,255,20,0.15)] group"
