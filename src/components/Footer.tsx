@@ -51,9 +51,6 @@ export const Footer = () => {
           <p className="text-[#a1a1aa] text-sm font-sans font-medium">
             © {new Date().getFullYear()} HM.ZONEDZ. Tous droits réservés.
           </p>
-          <div className="text-[#a1a1aa] text-sm font-sans font-medium flex items-center gap-1">
-            Made with <span className="text-[#ef4444]">🔥</span> in Algérie
-          </div>
         </div>
       </div>
     </footer>
