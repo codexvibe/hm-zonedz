@@ -24,50 +24,10 @@ interface Product {
 }
 
 const fallbackProducts: Product[] = [
-  {
-    id: 1,
-    name: 'PABLO ICE COLD',
-    category: 'Snus / Nicotine Pouches',
-    price: '1 200 DZD',
-    oldPrice: '1 500 DZD',
-    image: '/assets/snus_pablo.png',
-    badge: 'TOP VENTE 🔥',
-    badgeColor: 'bg-[#ef4444]',
-    glowColor: 'box-glow-green-hover',
-  },
-  {
-    id: 2,
-    name: 'TORNADO 9000 PRO',
-    category: 'Vape Jetable',
-    price: '3 500 DZD',
-    oldPrice: '4 200 DZD',
-    image: '/assets/vape_tornado.png',
-    badge: 'NOUVEAU ⚡',
-    badgeColor: 'bg-[#facc15] text-black',
-    glowColor: 'hover:shadow-[0_0_25px_rgba(250,204,21,0.6)]',
-  },
-  {
-    id: 3,
-    name: 'KILLA COLD MINT',
-    category: 'Snus / Nicotine Pouches',
-    price: '1 100 DZD',
-    oldPrice: null,
-    image: '/assets/snus_pablo.png',
-    badge: 'FORT 💪',
-    badgeColor: 'bg-[#ff00ff]',
-    glowColor: 'hover:shadow-[0_0_25px_rgba(255,0,255,0.6)]',
-  },
-  {
-    id: 4,
-    name: 'JNR ALIEN 10K',
-    category: 'Vape Jetable',
-    price: '4 000 DZD',
-    oldPrice: '4 500 DZD',
-    image: '/assets/vape_tornado.png',
-    badge: 'PROMO 🎁',
-    badgeColor: 'bg-[#39ff14] text-black',
-    glowColor: 'box-glow-green-hover',
-  }
+  { id: 1, name: 'PABLO ICE COLD', category: 'Snus', price: '1 200 DZD', oldPrice: '1 500 DZD', image: '/assets/snus_pablo.png', badge: 'TOP VENTE 🔥', badgeColor: 'bg-[#ef4444]', glowColor: 'box-glow-green-hover' },
+  { id: 2, name: 'KILLA COLD MINT', category: 'Snus', price: '1 100 DZD', oldPrice: null, image: '/assets/snus_pablo.png', badge: 'FORT 💪', badgeColor: 'bg-[#ff00ff]', glowColor: 'hover:shadow-[0_0_25px_rgba(255,0,255,0.6)]' },
+  { id: 3, name: 'RABBIT BLUE ICE', category: 'Snus', price: '1 300 DZD', oldPrice: null, image: '/assets/snus_pablo.png', badge: 'NEW BRAND', badgeColor: 'bg-blue-400 text-black', glowColor: 'box-glow-green-hover' },
+  { id: 4, name: 'VELO FREEZE MAX', category: 'Snus', price: '1 000 DZD', oldPrice: null, image: '/assets/snus_pablo.png', badge: 'DISCRET', badgeColor: 'bg-white text-black border', glowColor: 'box-glow-green-hover' }
 ];
 
 export const BestSellers = () => {
@@ -86,6 +46,7 @@ export const BestSellers = () => {
         const { data, error } = await supabase
           .from('products')
           .select('*')
+          .eq('is_visible', true)
           .limit(4);
           
         if (data && data.length > 0) {
@@ -141,7 +102,7 @@ export const BestSellers = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               key={product.id}
-              className={`bg-white dark:bg-[#0f0f0f] border border-black/5 dark:border-white/5 p-4 flex flex-col group transition-all duration-300 ${product.glowColor} relative overflow-hidden`}
+              className={`bg-white dark:bg-[#0f0f0f] border border-black/5 dark:border-white/5 p-4 flex flex-col group transition-all duration-500 hover:-translate-y-3 hover:shadow-xl ${product.glowColor} relative`}
               onClick={() => {
                 import('../app/admin/actions').then(m => m.incrementProductViewAction(product.id));
               }}
@@ -150,13 +111,13 @@ export const BestSellers = () => {
                 {product.badge}
               </div>
 
-              <div className="h-64 w-full relative mb-6 bg-gray-100 dark:bg-black rounded-sm overflow-hidden flex items-center justify-center p-4">
+              <div className="h-64 w-full relative mb-6 bg-gray-100 dark:bg-black rounded-sm flex items-center justify-center p-4">
                 <Image 
                   src={product.image} 
                   alt={product.name} 
                   width={200}
                   height={200}
-                  className="max-h-full object-contain group-hover:scale-110 transition-transform duration-500 will-change-transform"
+                  className="max-h-full object-contain group-hover:scale-110 group-hover:-translate-y-2 group-hover:rotate-3 drop-shadow-md group-hover:drop-shadow-2xl transition-all duration-500 ease-out will-change-transform"
                 />
               </div>
 

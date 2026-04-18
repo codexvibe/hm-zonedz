@@ -46,9 +46,9 @@ export const OrderModal = ({ isOpen, onClose, productName, productPrice }: Order
           customer_phone: phone,
           customer_wilaya: wilaya,
           customer_address: address || 'Non précisée',
-          product_name: productName,
-          product_price: productPrice,
-          status: 'Nouvelle'
+          items_list: productName,
+          total_price: productPrice,
+          status: 'Nouveau'
         });
 
       if (error) throw error;

@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState } from 'react';
-import { X, Send, CheckCircle, Loader2, MapPin, Phone, User, Package } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { X, CheckCircle, Loader2, MapPin, Phone, User, Package } from 'lucide-react';
 import { WILAYAS } from '../data/wilayas';
 import { createClient } from '../utils/supabase/client';
 import { useCart } from '../context/CartContext';
@@ -21,23 +20,25 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
   const [address, setAddress] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      requestAnimationFrame(() => setVisible(true));
+    } else {
+      setVisible(false);
+    }
+  }, [isOpen]);
 
   const deliveryPrice = getDeliveryPrice(wilaya);
   const total = subtotal + deliveryPrice;
 
   const resetForm = () => {
-    setName('');
-    setPhone('');
-    setWilaya('');
-    setAddress('');
-    setIsSuccess(false);
+    setName(''); setPhone(''); setWilaya(''); setAddress(''); setIsSuccess(false);
   };
 
   const handleClose = () => {
-    if (isSuccess) {
-      clearCart();
-      setIsSidebarOpen(false);
-    }
+    if (isSuccess) { clearCart(); setIsSidebarOpen(false); }
     resetForm();
     onClose();
   };
@@ -45,36 +46,31 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
   const handleOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !phone || !wilaya || cart.length === 0) return;
-    
     setIsSubmitting(true);
     try {
       const supabase = createClient();
-      
-      // On regroupe les produits par nom pour un résumé plus propre
       const groupedItems = cart.reduce((acc, item) => {
         if (!acc[item.name]) acc[item.name] = [];
-        const flavorStr = item.flavor ? `${item.flavor} ` : '';
+        const flavorStr = (item as any).flavor ? `${(item as any).flavor} ` : '';
         acc[item.name].push(`${flavorStr}(x${item.quantity})`);
         return acc;
       }, {} as Record<string, string[]>);
 
       const productsSummary = Object.entries(groupedItems)
-        .map(([name, variants]) => `${name.toLowerCase()} ${variants.join(' ')}`)
+        .map(([n, variants]) => `${n} ${variants.join(' ')}`)
         .join(', ');
 
-      const { error } = await supabase
-        .from('orders')
-        .insert({
-          customer_name: name,
-          customer_phone: phone,
-          customer_wilaya: wilaya,
-          customer_address: address || 'Non précisée',
-          items_list: productsSummary,
-          subtotal_price: Number(subtotal),
-          delivery_price: Number(deliveryPrice),
-          total_price: String(total),
-          status: 'Nouveau'
-        });
+      const { error } = await supabase.from('orders').insert({
+        customer_name: name,
+        customer_phone: phone,
+        customer_wilaya: wilaya,
+        customer_address: address || 'Non précisée',
+        items_list: productsSummary,
+        subtotal_price: subtotal,
+        delivery_price: deliveryPrice,
+        total_price: total,
+        status: 'Nouveau'
+      });
 
       if (error) throw error;
       setIsSuccess(true);
@@ -88,156 +84,120 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
 
   const isFormValid = name.trim() && phone.trim() && wilaya && cart.length > 0;
 
+  if (!isOpen) return null;
+
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[200] flex items-center justify-center p-4 overflow-y-auto"
-        >
-          {/* Backdrop */}
-          <div className="fixed inset-0 bg-white/90 dark:bg-black/90 backdrop-blur-md" onClick={handleClose} />
-          
-          {/* Modal */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative w-full max-w-lg bg-white dark:bg-[#0a0a0a] border border-black/10 dark:border-white/10 overflow-hidden my-auto shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header */}
-            <div className="bg-gradient-to-r from-[#39ff14]/20 to-transparent border-b border-[#39ff14]/30 px-6 py-4 flex justify-between items-center">
-              <div>
-                <h2 className="font-heading text-2xl text-black dark:text-white uppercase tracking-wider">Finaliser la commande</h2>
-                <p className="text-[#a1a1aa] text-xs font-bold uppercase tracking-widest">{cart.length} article(s) · Paiement à la livraison</p>
+    <div
+      className="fixed inset-0 z-[200] flex items-center justify-center p-4 overflow-y-auto"
+      style={{ opacity: visible ? 1 : 0, transition: 'opacity 0.2s ease' }}
+    >
+      <div className="fixed inset-0 bg-black/85" onClick={handleClose} />
+
+      <div
+        className="relative w-full max-w-lg bg-[#0a0a0a] border border-white/10 overflow-hidden my-auto shadow-2xl"
+        style={{
+          transform: visible ? 'translateY(0)' : 'translateY(24px)',
+          transition: 'transform 0.25s cubic-bezier(0.16,1,0.3,1)',
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="bg-gradient-to-r from-[#39ff14]/20 to-transparent border-b border-[#39ff14]/30 px-6 py-4 flex justify-between items-center">
+          <div>
+            <h2 className="font-heading text-2xl text-white uppercase tracking-wider">Finaliser la commande</h2>
+            <p className="text-[#a1a1aa] text-xs font-bold uppercase tracking-widest">{cart.length} article(s) · Paiement à la livraison</p>
+          </div>
+          <button onClick={handleClose} className="text-white/50 hover:text-white p-2 transition-colors">
+            <X size={24} />
+          </button>
+        </div>
+
+        {isSuccess ? (
+          <div className="p-10 flex flex-col items-center text-center gap-6">
+            <div className="w-24 h-24 rounded-full bg-[#39ff14]/10 flex items-center justify-center">
+              <CheckCircle size={56} className="text-[#39ff14]" />
+            </div>
+            <h3 className="font-heading text-4xl text-white uppercase">COMMANDE VALIDÉE !</h3>
+            <p className="text-[#a1a1aa] font-sans">
+              Merci <span className="text-white font-bold">{name}</span> ! Votre commande de <span className="text-[#39ff14] font-bold">{total.toLocaleString()} DZD</span> a bien été enregistrée.
+            </p>
+            <p className="text-sm text-[#a1a1aa] bg-white/5 px-4 py-2 rounded-sm italic">
+              Nous vous appellerons au <span className="text-white font-bold">{phone}</span> pour confirmer l'expédition.
+            </p>
+            <button onClick={handleClose} className="mt-4 w-full bg-[#39ff14] text-black font-heading text-xl py-4 uppercase hover:bg-white transition-colors">
+              Retour au site
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col">
+            <div className="bg-white/5 p-4 border-b border-white/5">
+              <div className="flex justify-between text-xs text-[#a1a1aa] uppercase font-bold tracking-widest mb-1">
+                <span>Sous-total</span><span>{subtotal.toLocaleString()} DZD</span>
               </div>
-              <button onClick={handleClose} className="text-black/50 hover:text-black dark:text-white/50 dark:hover:text-white p-2">
-                <X size={24} />
-              </button>
+              <div className="flex justify-between text-xs text-[#39ff14] uppercase font-bold tracking-widest">
+                <span>Livraison ({wilaya || 'Sél. Wilaya'})</span>
+                <span>{deliveryPrice > 0 ? `${deliveryPrice} DZD` : '---'}</span>
+              </div>
+              <div className="flex justify-between text-lg text-white font-heading uppercase mt-2 pt-2 border-t border-white/5">
+                <span>TOTAL À PAYER</span>
+                <span className="text-[#39ff14]">{total.toLocaleString()} DZD</span>
+              </div>
             </div>
 
-            {/* Content */}
-            {isSuccess ? (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="p-10 flex flex-col items-center text-center gap-6"
-              >
-                <div className="w-24 h-24 rounded-full bg-[#39ff14]/10 flex items-center justify-center">
-                  <CheckCircle size={56} className="text-[#39ff14]" />
+            <form onSubmit={handleOrder} className="p-6 flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] uppercase font-bold text-[#a1a1aa] tracking-widest">Nom & Prénom *</label>
+                <div className="relative">
+                  <User size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#555]" />
+                  <input required type="text" placeholder="Mohamed Benali" value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full bg-[#111] border border-white/10 text-white pl-10 pr-4 py-3 focus:border-[#39ff14] outline-none transition-colors" />
                 </div>
-                <h3 className="font-heading text-4xl text-black dark:text-white uppercase">COMMANDE VALIDÉE !</h3>
-                <p className="text-[#a1a1aa] font-sans">
-                  Merci <span className="text-black dark:text-white font-bold">{name}</span> ! Votre commande d'un montant de <span className="text-[#39ff14] font-bold">{total.toLocaleString()} DZD</span> a bien été enregistrée.
-                </p>
-                <p className="text-sm text-[#a1a1aa] bg-black/5 dark:bg-white/5 px-4 py-2 rounded-sm italic">
-                  Nous vous appellerons sous peu au <span className="text-black dark:text-white font-bold">{phone}</span> pour confirmer l'expédition.
-                </p>
-                <button
-                  onClick={handleClose}
-                  className="mt-4 w-full bg-[#39ff14] text-black font-heading text-xl py-4 uppercase hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all shadow-[0_0_20px_rgba(57,255,20,0.3)]"
-                >
-                  Retour au site
-                </button>
-              </motion.div>
-            ) : (
-              <div className="flex flex-col">
-                {/* Order Summary Recap (Mini) */}
-                <div className="bg-black/5 dark:bg-white/5 p-4 border-b border-black/5 dark:border-white/5">
-                  <div className="flex justify-between text-xs text-[#a1a1aa] uppercase font-bold tracking-widest mb-1">
-                    <span>Sous-total</span>
-                    <span>{subtotal.toLocaleString()} DZD</span>
-                  </div>
-                  <div className="flex justify-between text-xs text-[#39ff14] uppercase font-bold tracking-widest">
-                    <span>Livraison ({wilaya || 'Sél. Wilaya'})</span>
-                    <span>{deliveryPrice > 0 ? `${deliveryPrice} DZD` : '---'}</span>
-                  </div>
-                  <div className="flex justify-between text-lg text-black dark:text-white font-heading uppercase mt-2 pt-2 border-t border-black/10 dark:border-white/5">
-                    <span>TOTAL À PAYER</span>
-                    <span className="text-[#39ff14] dark:text-glow-green">{total.toLocaleString()} DZD</span>
-                  </div>
-                </div>
-
-                <form onSubmit={handleOrder} className="p-6 flex flex-col gap-4">
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[10px] uppercase font-bold text-[#a1a1aa] tracking-widest">Nom & Prénom *</label>
-                    <div className="relative">
-                      <User size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#555]" />
-                      <input
-                        required
-                        type="text"
-                        placeholder="Mohamed Benali"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className="w-full bg-gray-50 dark:bg-[#111] border border-black/10 dark:border-white/10 text-black dark:text-white pl-10 pr-4 py-3 focus:border-[#39ff14] dark:focus:border-[#39ff14] outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[10px] uppercase font-bold text-[#a1a1aa] tracking-widest">Téléphone *</label>
-                    <div className="relative">
-                      <Phone size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#555]" />
-                      <input
-                        required
-                        type="tel"
-                        placeholder="05 / 06 / 07 ..."
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        className="w-full bg-gray-50 dark:bg-[#111] border border-black/10 dark:border-white/10 text-black dark:text-white pl-10 pr-4 py-3 focus:border-[#39ff14] dark:focus:border-[#39ff14] outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[10px] uppercase font-bold text-[#a1a1aa] tracking-widest">Wilaya *</label>
-                    <div className="relative">
-                      <MapPin size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#555]" />
-                      <select
-                        required
-                        value={wilaya}
-                        onChange={(e) => setWilaya(e.target.value)}
-                        className="w-full bg-gray-50 dark:bg-[#111] border border-black/10 dark:border-white/10 text-black dark:text-white pl-10 pr-4 py-3 focus:border-[#39ff14] dark:focus:border-[#39ff14] outline-none appearance-none cursor-pointer"
-                      >
-                        <option value="">Sélectionnez votre Wilaya</option>
-                        {WILAYAS.map(w => <option key={w} value={w}>{w}</option>)}
-                      </select>
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#555]">▼</div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[10px] uppercase font-bold text-[#a1a1aa] tracking-widest">Adresse de livraison (Optionnel)</label>
-                    <input
-                      type="text"
-                      placeholder="Rue, Quartier, N° Maison..."
-                      value={address}
-                      onChange={(e) => setAddress(e.target.value)}
-                      className="w-full bg-gray-50 dark:bg-[#111] border border-black/10 dark:border-white/10 text-black dark:text-white px-4 py-3 focus:border-[#39ff14] dark:focus:border-[#39ff14] outline-none"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={!isFormValid || isSubmitting}
-                    className="mt-4 w-full bg-[#39ff14] text-black font-heading text-2xl py-5 uppercase flex items-center justify-center gap-3 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all active:scale-95 disabled:opacity-50 shadow-[0_0_20px_rgba(57,255,20,0.2)]"
-                  >
-                    {isSubmitting ? <Loader2 size={24} className="animate-spin" /> : <Package size={24} />}
-                    {isSubmitting ? "Validation..." : "Confirmer ma commande"}
-                  </button>
-
-                  <p className="text-center text-[10px] text-[#555] font-bold uppercase tracking-widest">
-                    🚚 Livraison express en Algérie · Paiement Cash à la réception
-                  </p>
-                </form>
               </div>
-            )}
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] uppercase font-bold text-[#a1a1aa] tracking-widest">Téléphone *</label>
+                <div className="relative">
+                  <Phone size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#555]" />
+                  <input required type="tel" placeholder="05 / 06 / 07 ..." value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="w-full bg-[#111] border border-white/10 text-white pl-10 pr-4 py-3 focus:border-[#39ff14] outline-none transition-colors" />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] uppercase font-bold text-[#a1a1aa] tracking-widest">Wilaya *</label>
+                <div className="relative">
+                  <MapPin size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#555]" />
+                  <select required value={wilaya} onChange={(e) => setWilaya(e.target.value)}
+                    className="w-full bg-[#111] border border-white/10 text-white pl-10 pr-4 py-3 focus:border-[#39ff14] outline-none appearance-none cursor-pointer transition-colors">
+                    <option value="">Sélectionnez votre Wilaya</option>
+                    {WILAYAS.map(w => <option key={w} value={w}>{w}</option>)}
+                  </select>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#555]">▼</div>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] uppercase font-bold text-[#a1a1aa] tracking-widest">Adresse (Optionnel)</label>
+                <input type="text" placeholder="Rue, Quartier, N° Maison..." value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  className="w-full bg-[#111] border border-white/10 text-white px-4 py-3 focus:border-[#39ff14] outline-none transition-colors" />
+              </div>
+
+              <button type="submit" disabled={!isFormValid || isSubmitting}
+                className="mt-4 w-full bg-[#39ff14] text-black font-heading text-2xl py-5 uppercase flex items-center justify-center gap-3 hover:bg-white transition-colors active:scale-95 disabled:opacity-50">
+                {isSubmitting ? <Loader2 size={24} className="animate-spin" /> : <Package size={24} />}
+                {isSubmitting ? "Validation..." : "Confirmer ma commande"}
+              </button>
+
+              <p className="text-center text-[10px] text-[#555] font-bold uppercase tracking-widest">
+                🚚 Livraison express en Algérie · Paiement Cash à la réception
+              </p>
+            </form>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };

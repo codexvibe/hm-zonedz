@@ -67,7 +67,7 @@ export const Hero = () => {
           className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto"
         >
           <Link 
-            href="#shop"
+            href="/shop"
             className="flex-1 sm:flex-none flex items-center justify-center gap-3 bg-[#39ff14] text-black font-heading text-xl px-8 py-4 uppercase hover:bg-white hover:text-black transition-all box-glow-green"
           >
             <ShoppingBag size={24} />

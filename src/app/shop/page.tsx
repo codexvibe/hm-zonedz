@@ -27,38 +27,23 @@ interface Product {
 
 const fallbackProducts: Product[] = [
   { id: 1, name: 'PABLO ICE COLD', category: 'Snus', price: '1 200 DZD', oldPrice: '1 500 DZD', image: '/assets/snus_pablo.png', badge: 'TOP VENTE 🔥', badgeColor: 'bg-[#ef4444]', glowColor: 'box-glow-green-hover' },
-  { id: 2, name: 'TORNADO 9000 PRO', category: 'Vape Jetable', price: '3 500 DZD', oldPrice: null, image: '/assets/vape_tornado.png', badge: 'NOUVEAU ⚡', badgeColor: 'bg-[#facc15] text-black', glowColor: 'hover:shadow-[0_0_25px_rgba(250,204,21,0.6)]' },
-  { id: 3, name: 'KILLA COLD MINT', category: 'Snus', price: '1 100 DZD', oldPrice: null, image: '/assets/snus_pablo.png', badge: 'FORT 💪', badgeColor: 'bg-[#ff00ff]', glowColor: 'hover:shadow-[0_0_25px_rgba(255,0,255,0.6)]' },
-  { id: 4, name: 'JNR ALIEN 10K', category: 'Vape Jetable', price: '4 000 DZD', oldPrice: null, image: '/assets/vape_tornado.png', badge: 'PROMO 🎁', badgeColor: 'bg-[#39ff14] text-black', glowColor: 'box-glow-green-hover' },
-  { id: 5, name: 'VELO FREEZE MAX', category: 'Snus', price: '1 000 DZD', oldPrice: null, image: '/assets/snus_pablo.png', badge: '', badgeColor: '', glowColor: 'box-glow-green-hover' },
-  { id: 6, name: 'ELFBAR 600 V2', category: 'Vape Jetable', price: '1 800 DZD', oldPrice: null, image: '/assets/vape_tornado.png', badge: 'CLASSIC', badgeColor: 'bg-white text-black', glowColor: 'box-glow-green-hover' },
-  { id: 7, name: 'CUBA BLACK LINE', category: 'Snus', price: '1 400 DZD', oldPrice: null, image: '/assets/snus_pablo.png', badge: 'EXTRÊME ☠️', badgeColor: 'bg-black text-white border border-[#ef4444]', glowColor: 'hover:shadow-[0_0_25px_rgba(239,68,68,0.8)]' },
-  { id: 8, name: 'CRYSTAL BAR 4000', category: 'Vape Jetable', price: '2 800 DZD', oldPrice: null, image: '/assets/vape_tornado.png', badge: '', badgeColor: '', glowColor: 'box-glow-green-hover' },
-  { id: 9, name: 'JNR ROCKET 25K', category: 'Puff', price: '4 500 DZD', oldPrice: '5 000 DZD', image: '/assets/vape_tornado.png', badge: 'MAX PUFFS 🚀', badgeColor: 'bg-blue-600', glowColor: 'hover:shadow-[0_0_25px_rgba(37,99,235,0.6)]' },
-  { id: 10, name: 'RABBIT BLUE ICE', category: 'Snus', price: '1 300 DZD', oldPrice: null, image: '/assets/snus_pablo.png', badge: 'NEW BRAND', badgeColor: 'bg-blue-400 text-black', glowColor: 'box-glow-green-hover' },
-  { id: 11, name: 'VUSE GO 5000', category: 'Vape Jetable', price: '3 200 DZD', oldPrice: null, image: '/assets/vape_tornado.png', badge: 'DESIGN 💎', badgeColor: 'bg-slate-800 text-white', glowColor: 'box-glow-green-hover' },
-  { id: 12, name: 'WHITE FOX FULL CHARGE', category: 'Snus', price: '1 500 DZD', oldPrice: null, image: '/assets/snus_pablo.png', badge: 'PREMIUM ✨', badgeColor: 'bg-indigo-600', glowColor: 'hover:shadow-[0_0_25px_rgba(79,70,229,0.6)]' },
-  { id: 13, name: 'TORNADO 12000 PRO', category: 'Puff 12k', price: '4 200 DZD', oldPrice: null, image: '/assets/vape_tornado.png', badge: 'XL CAPACITY', badgeColor: 'bg-orange-600', glowColor: 'hover:shadow-[0_0_25px_rgba(249,115,22,0.6)]' },
-  { id: 14, name: 'VELO ICE COOL', category: 'Snus', price: '1 150 DZD', oldPrice: null, image: '/assets/snus_pablo.png', badge: 'BEST SELLER', badgeColor: 'bg-[#39ff14] text-black', glowColor: 'box-glow-green-hover' },
-  { id: 15, name: 'KILLA WATERMELON', category: 'Snus', price: '1 100 DZD', oldPrice: null, image: '/assets/snus_pablo.png', badge: 'FRUITÉ 🍉', badgeColor: 'bg-pink-600', glowColor: 'hover:shadow-[0_0_25px_rgba(219,39,119,0.6)]' },
-  { id: 16, name: 'ELFBAR PI9000', category: 'Puff', price: '3 800 DZD', oldPrice: null, image: '/assets/vape_tornado.png', badge: 'COMPACT', badgeColor: 'bg-purple-600', glowColor: 'box-glow-green-hover' }
+  { id: 2, name: 'KILLA COLD MINT', category: 'Snus', price: '1 100 DZD', oldPrice: null, image: '/assets/snus_pablo.png', badge: 'FORT 💪', badgeColor: 'bg-[#ff00ff]', glowColor: 'hover:shadow-[0_0_25px_rgba(255,0,255,0.6)]' },
+  { id: 3, name: 'RABBIT BLUE ICE', category: 'Snus', price: '1 300 DZD', oldPrice: null, image: '/assets/snus_pablo.png', badge: 'NEW BRAND', badgeColor: 'bg-blue-400 text-black', glowColor: 'box-glow-green-hover' },
+  { id: 4, name: 'VELO FREEZE MAX', category: 'Snus', price: '1 000 DZD', oldPrice: null, image: '/assets/snus_pablo.png', badge: 'DISCRET', badgeColor: 'bg-white text-black border', glowColor: 'box-glow-green-hover' },
+  { id: 5, name: 'TORNADO 9000 PRO', category: 'Puff 9k', price: '3 500 DZD', oldPrice: null, image: '/assets/vape_tornado.png', badge: '9000 PUFFS ⚡', badgeColor: 'bg-[#facc15] text-black', glowColor: 'hover:shadow-[0_0_25px_rgba(250,204,21,0.6)]' },
+  { id: 6, name: 'TORNADO 12000 PRO', category: 'Puff 12k', price: '4 200 DZD', oldPrice: null, image: '/assets/vape_tornado.png', badge: '12000 PUFFS 🚀', badgeColor: 'bg-orange-600', glowColor: 'hover:shadow-[0_0_25px_rgba(249,115,22,0.6)]' },
+  { id: 7, name: 'JNR ROCKET 25K', category: 'Puff 25k', price: '4 500 DZD', oldPrice: '5 000 DZD', image: '/assets/vape_tornado.png', badge: 'MAX PUFFS 🌪️', badgeColor: 'bg-blue-600', glowColor: 'hover:shadow-[0_0_25px_rgba(37,99,235,0.6)]' },
+  { id: 8, name: 'JNR ALIEN 10K', category: 'Puff 10k', price: '4 000 DZD', oldPrice: null, image: '/assets/vape_tornado.png', badge: 'PROMO 🎁', badgeColor: 'bg-[#39ff14] text-black', glowColor: 'box-glow-green-hover' },
+  { id: 9, name: 'SALT E-LIQUID MENTHE', category: 'E-Liquides', price: '1 500 DZD', oldPrice: null, image: '/assets/vape_tornado.png', badge: 'NIC SALT', badgeColor: 'bg-indigo-600', glowColor: 'box-glow-green-hover' },
+  { id: 10, name: 'BIG BOY 100ML', category: 'E-Liquides', price: '2 500 DZD', oldPrice: '3 000 DZD', image: '/assets/vape_tornado.png', badge: 'FORMAT XL', badgeColor: 'bg-green-600', glowColor: 'box-glow-green-hover' },
+  { id: 11, name: 'PACK SNUS 10 PCS', category: 'Gros', price: '10 000 DZD', oldPrice: '12 000 DZD', image: '/assets/snus_pablo.png', badge: 'VENTE EN GROS', badgeColor: 'bg-black text-yellow-400', glowColor: 'box-glow-green-hover' },
+  { id: 12, name: 'PACK PUFF 5 PCS', category: 'Gros', price: '15 000 DZD', oldPrice: null, image: '/assets/vape_tornado.png', badge: 'PRIX DE GROS', badgeColor: 'bg-black text-blue-400', glowColor: 'box-glow-green-hover' },
+  { id: 13, name: 'RÉSISTANCE TORNADO', category: 'Accessoires', price: '800 DZD', oldPrice: null, image: '/assets/vape_tornado.png', badge: 'PIÈCE ORIGINALE', badgeColor: 'bg-slate-500', glowColor: 'box-glow-green-hover' },
+  { id: 14, name: 'CHARGEUR USB-C RAPIDE', category: 'Accessoires', price: '1 200 DZD', oldPrice: null, image: '/assets/vape_tornado.png', badge: 'ESSENTIEL', badgeColor: 'bg-slate-800', glowColor: 'box-glow-green-hover' },
+  { id: 15, name: 'BATTERIE 18650', category: 'Accessoires', price: '1 500 DZD', oldPrice: null, image: '/assets/vape_tornado.png', badge: 'PUISSANCE', badgeColor: 'bg-red-800', glowColor: 'box-glow-green-hover' },
+  { id: 16, name: 'ÉTUI DE TRANSPORT', category: 'Accessoires', price: '900 DZD', oldPrice: null, image: '/assets/vape_tornado.png', badge: 'PROTECTION', badgeColor: 'bg-gray-700', glowColor: 'box-glow-green-hover' }
 ];
-
-// Liste de base des catégories (Sera fusionnée avec les catégories réelles des produits)
-const DEFAULT_CATEGORIES = [
-  'Toutes', 
-  'Promotions', 
-  'Snus', 
-  'Vape Jetable', 
-  'Puff', 
-  'Puff 9k', 
-  'Puff 12k', 
-  'Puff 15k', 
-  'Puff 25k', 
-  'E-Liquides', 
-  'Gros', 
-  'Accessoires'
-];
+  // Les catégories dynamiques seront générées à partir des produits.
 
 export default function Shop() {
   const [activeCategory, setActiveCategory] = useState('Toutes');
@@ -67,7 +52,7 @@ export default function Shop() {
   const [selectedFlavors, setSelectedFlavors] = useState<Record<number, string>>({});
   const { addToCart } = useCart();
 
-  const availableCategories = Array.from(new Set([...DEFAULT_CATEGORIES, ...products.map(p => p.category)]));
+  const availableCategories = Array.from(new Set(['Toutes', 'Promotions', ...products.map(p => p.category?.trim() || 'Non classé')]));
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -79,7 +64,8 @@ export default function Shop() {
       try {
         const { data, error } = await supabase
           .from('products')
-          .select('*');
+          .select('*')
+          .eq('is_visible', true);
           
         if (data && data.length > 0) {
           const mappedData: Product[] = data.map((item: any) => ({
@@ -108,7 +94,7 @@ export default function Shop() {
     ? products 
     : activeCategory === 'Promotions'
       ? products.filter(p => p.oldPrice && p.oldPrice !== '')
-      : products.filter(p => p.category.toLowerCase() === activeCategory.toLowerCase());
+      : products.filter(p => (p.category?.trim() || 'Non classé').toLowerCase() === activeCategory.trim().toLowerCase());
 
   return (
     <>
@@ -172,7 +158,7 @@ export default function Shop() {
                       exit={{ opacity: 0, scale: 0.95 }}
                       transition={{ duration: 0.2 }}
                       key={product.id}
-                      className={`bg-white dark:bg-[#0f0f0f] border border-black/5 dark:border-white/5 p-4 flex flex-col group transition-all duration-300 ${product.glowColor} relative overflow-hidden`}
+                      className={`bg-white dark:bg-[#0f0f0f] border border-black/5 dark:border-white/5 p-4 flex flex-col group transition-all duration-500 hover:-translate-y-3 hover:shadow-xl ${product.glowColor} relative`}
                       onClick={() => {
                         import('../../app/admin/actions').then(m => m.incrementProductViewAction(product.id));
                       }}
@@ -183,12 +169,12 @@ export default function Shop() {
                         </div>
                       )}
 
-                      <div className="h-64 w-full relative mb-6 bg-gray-100 dark:bg-black rounded-sm overflow-hidden flex items-center justify-center p-4">
+                      <div className="h-64 w-full relative mb-6 bg-gray-100 dark:bg-black rounded-sm flex items-center justify-center p-4">
                         <img 
                           src={product.image} 
                           alt={product.name} 
                           loading="lazy"
-                          className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" 
+                          className="w-full h-full object-contain group-hover:scale-110 group-hover:-translate-y-2 group-hover:rotate-3 drop-shadow-md group-hover:drop-shadow-2xl transition-all duration-500 ease-out" 
                         />
                       </div>
 
