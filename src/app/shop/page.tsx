@@ -67,6 +67,14 @@ export default function Shop() {
   const [selectedFlavors, setSelectedFlavors] = useState<Record<number, string>>({});
   const { addToCart } = useCart();
 
+  // Extraire le nombre d'un string prix comme "1 500 DZD"
+  const parsePrice = (priceStr: string): number => {
+    if (!priceStr) return 0;
+    return parseInt(priceStr.replace(/\s/g, '').replace(/[^0-9]/g, ''), 10) || 0;
+  };
+
+  const [priceRange, setPriceRange] = useState<number>(5000);
+
   const checkCategoryHasProducts = (cat: string) => {
     if (cat === 'Toutes') return true;
     if (cat === 'Promotions') return products.some(p => p.oldPrice && p.oldPrice !== '');
@@ -121,13 +129,14 @@ export default function Shop() {
     fetchProducts();
   }, []);
 
-  const filteredProducts = activeCategory === 'Toutes' 
+  const filteredProducts = (activeCategory === 'Toutes' 
     ? products 
     : activeCategory === 'Promotions'
       ? products.filter(p => p.oldPrice && p.oldPrice !== '')
       : activeCategory === 'Vape Jetable' || activeCategory === 'Puff'
         ? products.filter(p => (p.category || '').toLowerCase().includes('vape') || (p.category || '').toLowerCase().includes('puff'))
-        : products.filter(p => (p.category?.trim() || 'Non classé').toLowerCase() === activeCategory.trim().toLowerCase());
+        : products.filter(p => (p.category?.trim() || 'Non classé').toLowerCase() === activeCategory.trim().toLowerCase())
+  ).filter(p => parsePrice(p.price) <= priceRange);
 
   return (
     <>
@@ -176,9 +185,49 @@ export default function Shop() {
                       </button>
                     </li>
                   ))}
-                </ul>
+              {/* Price Range Slider */}
+              <div className="mt-8 pt-6 border-t border-black/10 dark:border-white/10">
+                <h3 className="font-heading text-lg text-black dark:text-white mb-4 flex items-center gap-2 uppercase">
+                  <span className="text-[#39ff14] text-sm">💰</span>
+                  Budget Max
+                </h3>
+                <div className="flex items-center justify-between text-xs font-bold mb-3">
+                  <span className="text-gray-400">0 DZD</span>
+                  <span className="text-[#39ff14] font-mono text-sm">{priceRange.toLocaleString('fr-DZ')} DZD</span>
+                </div>
+                <div className="relative">
+                  <input
+                    type="range"
+                    min={0}
+                    max={5000}
+                    step={100}
+                    value={priceRange}
+                    onChange={e => setPriceRange(Number(e.target.value))}
+                    className="w-full h-1 rounded-full appearance-none cursor-pointer"
+                    style={{
+                      background: `linear-gradient(to right, #39ff14 0%, #39ff14 ${(priceRange / 5000) * 100}%, rgba(255,255,255,0.1) ${(priceRange / 5000) * 100}%, rgba(255,255,255,0.1) 100%)`,
+                    }}
+                  />
+                </div>
+                <div className="flex justify-between text-[10px] text-gray-400 mt-2 font-bold tracking-widest">
+                  <span>0</span>
+                  <span>1K</span>
+                  <span>2K</span>
+                  <span>3K</span>
+                  <span>4K</span>
+                  <span>5K</span>
+                </div>
+                {priceRange < 5000 && (
+                  <button
+                    onClick={() => setPriceRange(5000)}
+                    className="mt-3 w-full text-[10px] font-bold text-gray-400 hover:text-[#39ff14] uppercase tracking-widest transition-colors"
+                  >
+                    ✕ Réinitialiser le filtre
+                  </button>
+                )}
               </div>
-            </aside>
+            </div>
+          </aside>
 
             {/* Product Grid */}
             <div className="flex-1">
