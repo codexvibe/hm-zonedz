@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 
@@ -11,6 +11,7 @@ export const IntroLoader = () => {
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
   const [show, setShow] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     // Vérifier si l'animation a déjà été jouée dans cette session
@@ -23,14 +24,18 @@ export const IntroLoader = () => {
 
     setShow(true);
 
-    // Séquence temporelle
-    const timer1 = setTimeout(() => setPhase('blackout'), 2500); // 2.5s de zoom malle
-    const timer2 = setTimeout(() => setPhase('branding'), 3300); // Transition vers noir
-    
-    // Simulation d'une progression fluide qui démarre avec le branding
-    let interval: NodeJS.Timeout;
-    const timer3 = setTimeout(() => {
-      interval = setInterval(() => {
+    // Sécurité: Si la vidéo met trop de temps à charger ou n'existe pas, on passe au branding après 4s
+    const fallbackTimer = setTimeout(() => {
+      if (phase === 'trunk') setPhase('branding');
+    }, 4500);
+
+    return () => clearTimeout(fallbackTimer);
+  }, [phase]);
+
+  // Démarrer le chargement une fois arrivé au branding
+  useEffect(() => {
+    if (phase === 'branding') {
+      const interval = setInterval(() => {
         setProgress((prev) => {
           if (prev >= 100) {
             clearInterval(interval);
@@ -46,15 +51,9 @@ export const IntroLoader = () => {
           return prev + 1;
         });
       }, 15);
-    }, 3500);
-
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-      clearTimeout(timer3);
-      if (interval) clearInterval(interval);
-    };
-  }, []);
+      return () => clearInterval(interval);
+    }
+  }, [phase]);
 
   if (!loading || !show) return null;
 
@@ -69,42 +68,40 @@ export const IntroLoader = () => {
           transition: { duration: 0.8, ease: "easeInOut" }
         }}
       >
-        {/* PHASE 1: LA MALLE QUI S'OUVRE ET ZOOM */}
+        {/* PHASE 1: VIDÉO DE LA MALLE QUI S'OUVRE */}
         <AnimatePresence>
           {(phase === 'trunk' || phase === 'blackout') && (
             <motion.div 
               className="absolute inset-0 z-10"
-              initial={{ scale: 1 }}
+              initial={{ opacity: 1 }}
               animate={{ 
-                scale: phase === 'blackout' ? 2.5 : 1.3,
-                opacity: phase === 'blackout' ? 0 : 1
+                opacity: phase === 'blackout' ? 0 : 1,
+                scale: phase === 'blackout' ? 1.2 : 1
               }}
-              transition={{ 
-                scale: { duration: 3, ease: "easeInOut" },
-                opacity: { duration: 0.8 }
-              }}
+              transition={{ duration: 0.8 }}
             >
-              <Image 
-                src="/assets/hero_bg.png" 
-                alt="Trunk Opening" 
-                fill 
-                className="object-cover"
-                priority
-              />
-              
-              {/* Volets "Malle" qui s'ouvrent au début */}
-              <motion.div 
-                className="absolute inset-0 bg-black z-20 origin-top"
-                initial={{ scaleY: 1 }}
-                animate={{ scaleY: 0 }}
-                transition={{ duration: 1.5, ease: [0.45, 0, 0.55, 1] }}
-              />
-              <motion.div 
-                className="absolute inset-0 bg-black z-20 origin-bottom"
-                initial={{ scaleY: 1 }}
-                animate={{ scaleY: 0 }}
-                transition={{ duration: 1.5, ease: [0.45, 0, 0.55, 1] }}
-              />
+              {/* On tente de charger la vidéo intro.mp4 */}
+              <video
+                ref={videoRef}
+                autoPlay
+                muted
+                playsInline
+                onEnded={() => setPhase('branding')}
+                onError={() => {
+                   // Fallback sur l'image si la vidéo échoue
+                   console.log("Video not found, using image fallback");
+                }}
+                className="w-full h-full object-cover"
+              >
+                <source src="/assets/intro.mp4" type="video/mp4" />
+                {/* Fallback image au cas où le navigateur ne supporte pas la vidéo */}
+                <img src="/assets/hero_bg.png" alt="Fallback" className="w-full h-full object-cover" />
+              </video>
+
+              {/* Overlay de fondu pour la fin de vidéo */}
+              {phase === 'blackout' && (
+                <div className="absolute inset-0 bg-black z-20" />
+              )}
             </motion.div>
           )}
         </AnimatePresence>
@@ -116,11 +113,9 @@ export const IntroLoader = () => {
             animate={{ opacity: 1 }}
             className="relative z-30 flex flex-col items-center"
           >
-            {/* Cercles de fond neon subtils */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#39ff14]/5 rounded-full blur-[120px]" />
             
             <div className="relative flex flex-col items-center">
-              {/* Logo animé */}
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
@@ -133,11 +128,10 @@ export const IntroLoader = () => {
                   alt="HM.ZONEDZ Logo" 
                   width={140} 
                   height={140} 
-                  className="rounded-2xl relative z-10 border border-[#39ff14]/30"
+                  className="rounded-2xl relative z-10 border border-[#39ff14]/30 shadow-2xl shadow-[#39ff14]/10"
                 />
               </motion.div>
 
-              {/* Texte de marque */}
               <motion.div
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
@@ -156,7 +150,6 @@ export const IntroLoader = () => {
                 </div>
               </motion.div>
 
-              {/* Barre de progression futuriste */}
               <div className="w-72 h-[1px] bg-white/10 relative overflow-hidden rounded-full">
                 <motion.div 
                   className="absolute left-0 top-0 h-full bg-[#39ff14] shadow-[0_0_15px_#39ff14]"
@@ -180,7 +173,6 @@ export const IntroLoader = () => {
               </div>
             </div>
 
-            {/* Lignes de scan futuristes */}
             <div className="absolute inset-0 pointer-events-none opacity-10">
               <div className="w-full h-full bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]" />
             </div>
