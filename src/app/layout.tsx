@@ -12,6 +12,7 @@ export const metadata: Metadata = {
 
 import { CartProvider } from "../context/CartContext";
 import { ThemeProvider } from "../components/ThemeProvider";
+import { IntroLoader } from "../components/IntroLoader";
 
 export default function RootLayout({
   children,
@@ -23,6 +24,7 @@ export default function RootLayout({
       <body suppressHydrationWarning className={`${inter.variable} ${anton.variable} font-sans antialiased bg-white dark:bg-black text-black dark:text-white transition-colors duration-300`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
           <CartProvider>
+            <IntroLoader />
             {children}
           </CartProvider>
         </ThemeProvider>
