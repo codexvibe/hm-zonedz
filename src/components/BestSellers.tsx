@@ -138,7 +138,7 @@ export const BestSellers = () => {
                 <div className="flex items-baseline gap-2 mb-4">
                   <span className="text-xl font-bold font-sans text-[#39ff14]">{product.price}</span>
                   {product.oldPrice && (
-                    <span className="text-sm font-sans text-gray-400 dark:text-[#525252] line-through">
+                    <span className="text-sm font-bold font-sans text-[#ef4444] line-through">
                       {product.oldPrice}
                     </span>
                   )}

@@ -231,7 +231,7 @@ export default function ProductDetail() {
                       {product.price}
                     </span>
                     {product.old_price && (
-                      <span className="text-2xl font-sans text-gray-600 line-through">
+                      <span className="text-2xl font-bold font-sans text-[#ef4444] line-through">
                         {product.old_price}
                       </span>
                     )}
