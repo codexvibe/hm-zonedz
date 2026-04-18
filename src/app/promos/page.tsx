@@ -31,13 +31,17 @@ const fallbackPromos: Product[] = [
 ];
 
 export default function Promos() {
-  const [products, setProducts] = useState<Product[]>(fallbackPromos);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedFlavors, setSelectedFlavors] = useState<Record<number, string>>({});
   const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchPromos = async () => {
+      setIsLoading(true);
       if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'YOUR_SUPABASE_URL') {
+        setProducts(fallbackPromos);
+        setIsLoading(false);
         return;
       }
 
@@ -47,7 +51,8 @@ export default function Promos() {
           .from('products')
           .select('*')
           .eq('is_visible', true)
-          .not('old_price', 'is', null);
+          .not('old_price', 'is', null)
+          .order('id', { ascending: false });
 
         if (data && data.length > 0) {
           const mappedData: Product[] = data.map((item: any) => ({
@@ -67,9 +72,16 @@ export default function Promos() {
             flavors: item.flavors || []
           }));
           setProducts(mappedData);
+        } else {
+          if (!data || data.length === 0) {
+            setProducts(fallbackPromos);
+          }
         }
       } catch (err) {
         console.error('Erreur Supabase promos:', err);
+        setProducts(fallbackPromos);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -114,7 +126,17 @@ export default function Promos() {
           </div>
 
           {/* Grille des produits en promo */}
-          {products.length > 0 ? (
+          {isLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="bg-white dark:bg-[#0f0f0f] border border-black/5 p-4 flex flex-col h-[400px] animate-pulse">
+                  <div className="h-56 w-full bg-gray-200 dark:bg-white/5 rounded-sm mb-6" />
+                  <div className="h-4 w-24 bg-gray-200 dark:bg-white/5 rounded mb-2" />
+                  <div className="h-8 w-full bg-gray-200 dark:bg-white/5 rounded mb-4" />
+                </div>
+              ))}
+            </div>
+          ) : products.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {products.map((product, index) => (
                 <motion.div

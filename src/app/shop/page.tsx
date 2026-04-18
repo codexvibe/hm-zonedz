@@ -63,7 +63,8 @@ const DEFAULT_CATEGORIES = [
 export default function Shop() {
   const [activeCategory, setActiveCategory] = useState('Toutes');
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
-  const [products, setProducts] = useState<Product[]>(fallbackProducts);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedFlavors, setSelectedFlavors] = useState<Record<number, string>>({});
   const { addToCart } = useCart();
 
@@ -83,8 +84,11 @@ export default function Shop() {
 
   useEffect(() => {
     const fetchProducts = async () => {
+      setIsLoading(true);
       // Si les clés Supabase ne sont pas configurées, on garde le fallback
       if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'YOUR_SUPABASE_URL') {
+        setProducts(fallbackProducts);
+        setIsLoading(false);
         return;
       }
       
@@ -92,7 +96,8 @@ export default function Shop() {
         const { data, error } = await supabase
           .from('products')
           .select('*')
-          .eq('is_visible', true);
+          .eq('is_visible', true)
+          .order('id', { ascending: false });
           
         if (data && data.length > 0) {
           const mappedData: Product[] = data.map((item: any) => ({
@@ -112,9 +117,19 @@ export default function Shop() {
             flavors: item.flavors || []
           }));
           setProducts(mappedData);
+        } else {
+          // Si pas de données, on vide ou on peut mettre le fallback ? 
+          // Généralement si l'utilisateur a sa propre DB, s'il n'y a rien, on montre vide ou fallback.
+          // Je vais remettre le fallback seulement s'il n'y a VRAIMENT rien du tout trouvé.
+          if (!data || data.length === 0) {
+            setProducts(fallbackProducts);
+          }
         }
       } catch (err) {
         console.error('Erreur Supabase, fallback utilisé:', err);
+        setProducts(fallbackProducts);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -182,87 +197,105 @@ export default function Shop() {
 
             {/* Product Grid */}
             <div className="flex-1">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <AnimatePresence>
-                  {filteredProducts.map((product) => (
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ duration: 0.2 }}
-                      key={product.id}
-                      className={`bg-white dark:bg-[#0f0f0f] border border-black/5 dark:border-white/5 p-4 flex flex-col group transition-all duration-500 hover:-translate-y-3 hover:shadow-xl ${product.glowColor} relative`}
-                      onClick={() => {
-                        import('../../app/admin/actions').then(m => m.incrementProductViewAction(product.id));
-                      }}
-                    >
-                      {product.badge && (
-                        <div className={`absolute top-4 left-4 z-10 ${product.badgeColor} px-4 py-1.5 font-heading text-sm md:text-base tracking-wider uppercase shadow-md`}>
-                          {product.badge}
-                        </div>
-                      )}
-
-                      <div className="h-64 w-full relative mb-6 bg-gray-100 dark:bg-black rounded-sm flex items-center justify-center p-4">
-                        <img 
-                          src={product.image} 
-                          alt={product.name} 
-                          loading="lazy"
-                          className="w-full h-full object-contain group-hover:scale-110 group-hover:-translate-y-2 group-hover:rotate-3 drop-shadow-md group-hover:drop-shadow-2xl transition-all duration-500 ease-out" 
-                        />
+              {isLoading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[...Array(6)].map((_, i) => (
+                    <div key={i} className="bg-white dark:bg-[#0f0f0f] border border-black/5 dark:border-white/5 p-4 flex flex-col h-[400px] animate-pulse">
+                      <div className="h-64 w-full bg-gray-200 dark:bg-white/5 rounded-sm mb-6" />
+                      <div className="h-4 w-24 bg-gray-200 dark:bg-white/5 rounded mb-2" />
+                      <div className="h-8 w-full bg-gray-200 dark:bg-white/5 rounded mb-4" />
+                      <div className="mt-auto flex gap-2">
+                        <div className="h-10 flex-1 bg-gray-200 dark:bg-white/5 rounded" />
+                        <div className="h-10 flex-1 bg-gray-200 dark:bg-white/5 rounded" />
                       </div>
-
-                      <div className="flex-1 flex flex-col">
-                        <span className="text-xs text-[#a1a1aa] font-bold tracking-widest uppercase mb-1">{product.category}</span>
-                        <h3 className="font-heading text-xl md:text-2xl text-black dark:text-white mb-2">{product.name}</h3>
-                        
-                        <div className="flex items-center gap-3 mb-6">
-                          <span className="text-2xl font-bold font-sans text-[#39ff14]">{product.price}</span>
-                          {product.oldPrice && (
-                            <span className="text-base font-bold font-sans text-[#ef4444] line-through">{product.oldPrice}</span>
-                          )}
-                        </div>
-
-                        {product.flavors && product.flavors.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mb-4">
-                            {product.flavors.slice(0, 3).map((f: any, i) => (
-                              <span key={i} className="text-[8px] bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 px-1.5 py-0.5 text-black/40 dark:text-white/40 uppercase">
-                                {typeof f === 'string' ? f : f.name}
-                              </span>
-                            ))}
-                            {product.flavors.length > 3 && <span className="text-[8px] text-white/20">+{product.flavors.length - 3}</span>}
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="flex flex-col gap-2 relative z-10 pt-4 border-t border-black/5 dark:border-white/5">
-                        <div className="flex gap-2">
-                          <Link href={`/product/${product.id}`} className="flex-1 bg-white/5 hover:bg-white/10 dark:bg-white/5 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 text-black dark:text-white font-heading py-2 text-center text-xs uppercase tracking-widest transition-all">
-                            Voir Détails
-                          </Link>
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const firstFlavor = product.flavors?.[0];
-                              const flavor = typeof firstFlavor === 'string' 
-                                ? firstFlavor 
-                                : (firstFlavor as any)?.name || '';
-                              addToCart(product as any, flavor);
-                            }}
-                            className="flex-1 bg-[#39ff14] hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black text-black font-heading py-2 text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2"
-                          >
-                            <ShoppingCart size={14} /> Acheter
-                          </button>
-                        </div>
-                      </div>
-                    </motion.div>
+                    </div>
                   ))}
-                </AnimatePresence>
-              </div>
-              
-              {filteredProducts.length === 0 && (
-                <div className="text-center py-20">
-                  <p className="text-2xl font-heading text-[#a1a1aa] uppercase">Aucun produit dans cette catégorie.</p>
                 </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <AnimatePresence>
+                      {filteredProducts.map((product) => (
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          transition={{ duration: 0.2 }}
+                          key={product.id}
+                          className={`bg-white dark:bg-[#0f0f0f] border border-black/5 dark:border-white/5 p-4 flex flex-col group transition-all duration-500 hover:-translate-y-3 hover:shadow-xl ${product.glowColor} relative`}
+                          onClick={() => {
+                            import('../../app/admin/actions').then(m => m.incrementProductViewAction(product.id));
+                          }}
+                        >
+                          {product.badge && (
+                            <div className={`absolute top-4 left-4 z-10 ${product.badgeColor} px-4 py-1.5 font-heading text-sm md:text-base tracking-wider uppercase shadow-md`}>
+                              {product.badge}
+                            </div>
+                          )}
+
+                          <div className="h-64 w-full relative mb-6 bg-gray-100 dark:bg-black rounded-sm flex items-center justify-center p-4">
+                            <img 
+                              src={product.image} 
+                              alt={product.name} 
+                              loading="lazy"
+                              className="w-full h-full object-contain group-hover:scale-110 group-hover:-translate-y-2 group-hover:rotate-3 drop-shadow-md group-hover:drop-shadow-2xl transition-all duration-500 ease-out" 
+                            />
+                          </div>
+
+                          <div className="flex-1 flex flex-col">
+                            <span className="text-xs text-[#a1a1aa] font-bold tracking-widest uppercase mb-1">{product.category}</span>
+                            <h3 className="font-heading text-xl md:text-2xl text-black dark:text-white mb-2">{product.name}</h3>
+                            
+                            <div className="flex items-center gap-3 mb-6">
+                              <span className="text-2xl font-bold font-sans text-[#39ff14]">{product.price}</span>
+                              {product.oldPrice && (
+                                <span className="text-base font-bold font-sans text-[#ef4444] line-through">{product.oldPrice}</span>
+                              )}
+                            </div>
+
+                            {product.flavors && product.flavors.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mb-4">
+                                {product.flavors.slice(0, 3).map((f: any, i) => (
+                                  <span key={i} className="text-[8px] bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 px-1.5 py-0.5 text-black/40 dark:text-white/40 uppercase">
+                                    {typeof f === 'string' ? f : f.name}
+                                  </span>
+                                ))}
+                                {product.flavors.length > 3 && <span className="text-[8px] text-white/20">+{product.flavors.length - 3}</span>}
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="flex flex-col gap-2 relative z-10 pt-4 border-t border-black/5 dark:border-white/5">
+                            <div className="flex gap-2">
+                              <Link href={`/product/${product.id}`} className="flex-1 bg-white/5 hover:bg-white/10 dark:bg-white/5 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 text-black dark:text-white font-heading py-2 text-center text-xs uppercase tracking-widest transition-all">
+                                Voir Détails
+                              </Link>
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const firstFlavor = product.flavors?.[0];
+                                  const flavor = typeof firstFlavor === 'string' 
+                                    ? firstFlavor 
+                                    : (firstFlavor as any)?.name || '';
+                                  addToCart(product as any, flavor);
+                                }}
+                                className="flex-1 bg-[#39ff14] hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black text-black font-heading py-2 text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2"
+                              >
+                                <ShoppingCart size={14} /> Acheter
+                              </button>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                  
+                  {filteredProducts.length === 0 && (
+                    <div className="text-center py-20">
+                      <p className="text-2xl font-heading text-[#a1a1aa] uppercase">Aucun produit dans cette catégorie.</p>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
