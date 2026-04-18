@@ -80,21 +80,17 @@ export const IntroLoader = () => {
               }}
               transition={{ duration: 0.8 }}
             >
-              {/* On tente de charger la vidéo intro.mp4 */}
+              {/* On charge la vidéo spécifique fournie par l'utilisateur */}
               <video
                 ref={videoRef}
                 autoPlay
                 muted
                 playsInline
                 onEnded={() => setPhase('branding')}
-                onError={() => {
-                   // Fallback sur l'image si la vidéo échoue
-                   console.log("Video not found, using image fallback");
-                }}
                 className="w-full h-full object-cover"
               >
-                <source src="/assets/intro.mp4" type="video/mp4" />
-                {/* Fallback image au cas où le navigateur ne supporte pas la vidéo */}
+                <source src="/assets/PixVerse_V6_Image_Text_720P_je_veux_quand_il_o - Trim.mp4" type="video/mp4" />
+                {/* Fallback image */}
                 <img src="/assets/hero_bg.png" alt="Fallback" className="w-full h-full object-cover" />
               </video>
 
