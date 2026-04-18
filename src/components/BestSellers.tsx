@@ -31,14 +31,18 @@ const fallbackProducts: Product[] = [
 ];
 
 export const BestSellers = () => {
-  const [products, setProducts] = useState<Product[]>(fallbackProducts);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedFlavors, setSelectedFlavors] = useState<Record<number, string>>({});
   const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchProducts = async () => {
+      setIsLoading(true);
       // Si les clés Supabase ne sont pas configurées, on garde le fallback
       if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'YOUR_SUPABASE_URL') {
+        setProducts(fallbackProducts);
+        setIsLoading(false);
         return;
       }
       
@@ -47,6 +51,7 @@ export const BestSellers = () => {
           .from('products')
           .select('*')
           .eq('is_visible', true)
+          .order('id', { ascending: false })
           .limit(4);
           
         if (data && data.length > 0) {
@@ -64,13 +69,20 @@ export const BestSellers = () => {
               if (!c || c.includes('bg-white') || c.includes('bg-gray') || c.includes('bg-slate')) return 'bg-[#ef4444]';
               return c;
             })(),
-            glowColor: item.glow_color,
+            glowColor: item.glow_color || 'box-glow-green-hover',
             flavors: item.flavors || []
           }));
           setProducts(mappedData);
+        } else {
+          if (!data || data.length === 0) {
+            setProducts(fallbackProducts);
+          }
         }
       } catch (err) {
         console.error('Erreur Supabase, fallback utilisé:', err);
+        setProducts(fallbackProducts);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -99,78 +111,88 @@ export const BestSellers = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {products.map((product, index) => (
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              key={product.id}
-              className={`bg-white dark:bg-[#0f0f0f] border border-black/5 dark:border-white/5 p-4 flex flex-col group transition-all duration-500 hover:-translate-y-3 hover:shadow-xl ${product.glowColor} relative`}
-              onClick={() => {
-                import('../app/admin/actions').then(m => m.incrementProductViewAction(product.id));
-              }}
-            >
-              <div className={`absolute top-4 left-4 z-10 ${product.badgeColor} px-4 py-1.5 font-heading text-sm md:text-base tracking-wider uppercase shadow-md`}>
-                {product.badge}
+          {isLoading ? (
+            [...Array(4)].map((_, i) => (
+              <div key={i} className="bg-white dark:bg-[#0f0f0f] border border-black/5 p-4 flex flex-col h-[400px] animate-pulse">
+                <div className="h-64 w-full bg-gray-200 dark:bg-white/5 rounded-sm mb-6" />
+                <div className="h-4 w-24 bg-gray-200 dark:bg-white/5 rounded mb-2" />
+                <div className="h-8 w-full bg-gray-200 dark:bg-white/5 rounded mb-4" />
               </div>
-
-              <div className="h-64 w-full relative mb-6 bg-gray-100 dark:bg-black rounded-sm flex items-center justify-center p-4">
-                <Image 
-                  src={product.image} 
-                  alt={product.name} 
-                  width={200}
-                  height={200}
-                  className="max-h-full object-contain group-hover:scale-110 group-hover:-translate-y-2 group-hover:rotate-3 drop-shadow-md group-hover:drop-shadow-2xl transition-all duration-500 ease-out will-change-transform"
-                />
-              </div>
-
-              <div className="flex-1">
-                <div className="flex justify-between items-start mb-2 mt-4 relative z-10">
-                  <span className="text-[10px] font-bold text-[#a1a1aa] uppercase tracking-widest">{product.category}</span>
-                  {product.badge && (
-                    <span className={`px-2.5 py-1 ${product.badgeColor} text-white font-heading text-xs tracking-wider uppercase shadow-sm`}>
-                      {product.badge}
-                    </span>
-                  )}
+            ))
+          ) : (
+            products.map((product, index) => (
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                key={product.id}
+                className={`bg-white dark:bg-[#0f0f0f] border border-black/5 dark:border-white/5 p-4 flex flex-col group transition-all duration-500 hover:-translate-y-3 hover:shadow-xl ${product.glowColor} relative`}
+                onClick={() => {
+                  import('../app/admin/actions').then(m => m.incrementProductViewAction(product.id));
+                }}
+              >
+                <div className={`absolute top-4 left-4 z-10 ${product.badgeColor} px-4 py-1.5 font-heading text-sm md:text-base tracking-wider uppercase shadow-md`}>
+                  {product.badge}
                 </div>
-                
-                <Link href={`/product/${product.id}`} className="block group/link">
-                  <h3 className="font-heading text-xl text-black dark:text-white mb-2 uppercase group-hover/link:text-[#39ff14] transition-colors">{product.name}</h3>
-                </Link>
-                
-                <div className="flex items-baseline gap-2 mb-4">
-                  <span className="text-xl font-bold font-sans text-[#39ff14]">{product.price}</span>
-                  {product.oldPrice && (
-                    <span className="text-sm font-bold font-sans text-[#ef4444] line-through">
-                      {product.oldPrice}
-                    </span>
-                  )}
-                </div>
-              </div>
 
-              <div className="flex flex-col gap-2 relative z-10 pt-4 border-t border-black/5 dark:border-white/5">
-                <div className="flex gap-2">
-                  <Link href={`/product/${product.id}`} className="flex-1 bg-white/5 hover:bg-white/10 dark:bg-white/5 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 text-black dark:text-white font-heading py-2 text-center text-xs uppercase tracking-widest transition-all">
-                    Voir Détails
+                <div className="h-64 w-full relative mb-6 bg-gray-100 dark:bg-black rounded-sm flex items-center justify-center p-4">
+                  <Image 
+                    src={product.image} 
+                    alt={product.name} 
+                    width={200}
+                    height={200}
+                    className="max-h-full object-contain group-hover:scale-110 group-hover:-translate-y-2 group-hover:rotate-3 drop-shadow-md group-hover:drop-shadow-2xl transition-all duration-500 ease-out will-change-transform"
+                  />
+                </div>
+
+                <div className="flex-1">
+                  <div className="flex justify-between items-start mb-2 mt-4 relative z-10">
+                    <span className="text-[10px] font-bold text-[#a1a1aa] uppercase tracking-widest">{product.category}</span>
+                    {product.badge && (
+                      <span className={`px-2.5 py-1 ${product.badgeColor} text-white font-heading text-xs tracking-wider uppercase shadow-sm`}>
+                        {product.badge}
+                      </span>
+                    )}
+                  </div>
+                  
+                  <Link href={`/product/${product.id}`} className="block group/link">
+                    <h3 className="font-heading text-xl text-black dark:text-white mb-2 uppercase group-hover/link:text-[#39ff14] transition-colors">{product.name}</h3>
                   </Link>
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const firstFlavor = product.flavors?.[0];
-                      const flavor = typeof firstFlavor === 'string' 
-                        ? firstFlavor 
-                        : (firstFlavor as any)?.name || '';
-                      addToCart(product as any, flavor);
-                    }}
-                    className="flex-1 bg-[#39ff14] hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black text-black font-heading py-2 text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2"
-                  >
-                    <ShoppingCart size={14} /> Acheter
-                  </button>
+                  
+                  <div className="flex items-baseline gap-2 mb-4">
+                    <span className="text-xl font-bold font-sans text-[#39ff14]">{product.price}</span>
+                    {product.oldPrice && (
+                      <span className="text-sm font-bold font-sans text-[#ef4444] line-through">
+                        {product.oldPrice}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
+
+                <div className="flex flex-col gap-2 relative z-10 pt-4 border-t border-black/5 dark:border-white/5">
+                  <div className="flex gap-2">
+                    <Link href={`/product/${product.id}`} className="flex-1 bg-white/5 hover:bg-white/10 dark:bg-white/5 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 text-black dark:text-white font-heading py-2 text-center text-xs uppercase tracking-widest transition-all">
+                      Voir Détails
+                    </Link>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const firstFlavor = product.flavors?.[0];
+                        const flavor = typeof firstFlavor === 'string' 
+                          ? firstFlavor 
+                          : (firstFlavor as any)?.name || '';
+                        addToCart(product as any, flavor);
+                      }}
+                      className="flex-1 bg-[#39ff14] hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black text-black font-heading py-2 text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2"
+                    >
+                      <ShoppingCart size={14} /> Acheter
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            ))
+          )}
         </div>
 
         <div className="mt-8 text-center md:hidden">

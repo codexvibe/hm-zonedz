@@ -170,19 +170,27 @@ export default function ProductDetail() {
                 </AnimatePresence>
 
                 {/* Badge Dynamique */}
-                {product.badge && (
-                  <div className="absolute top-8 left-8 z-10">
-                    <motion.div 
-                      initial={{ x: -20, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      className={`flex items-center gap-2 bg-black border border-white/20 px-4 py-2 shadow-lg`}
-                      style={{ borderColor: product.badge_color || '#ff00ff' }}
-                    >
-                      <Zap size={14} className="text-[#39ff14] fill-[#39ff14]" />
-                      <span className="text-xs font-bold uppercase tracking-widest text-white">{product.badge}</span>
-                    </motion.div>
-                  </div>
-                )}
+                {product.badge && (() => {
+                  const safeColor = (product.badge_color && !product.badge_color.includes('bg-white') && !product.badge_color.includes('bg-gray') && !product.badge_color.includes('bg-slate'))
+                    ? product.badge_color : '#39ff14';
+                  
+                  // Si c'est une classe Tailwind, on l'utilise, sinon on utilise la couleur en style
+                  const isTailwind = product.badge_color?.startsWith('bg-');
+
+                  return (
+                    <div className="absolute top-8 left-8 z-10">
+                      <motion.div 
+                        initial={{ x: -20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        className={`flex items-center gap-2 bg-black border px-4 py-2 shadow-lg ${isTailwind ? safeColor : ''}`}
+                        style={{ borderColor: !isTailwind ? (product.badge_color || '#ff00ff') : 'rgba(255,255,255,0.1)' }}
+                      >
+                        <Zap size={14} className="text-[#39ff14] fill-[#39ff14]" />
+                        <span className="text-xs font-bold uppercase tracking-widest text-white">{product.badge}</span>
+                      </motion.div>
+                    </div>
+                  );
+                })()}
 
                 {/* Bottom Reflective Surface effect */}
                 <div className="absolute bottom-0 left-0 w-full h-1/4 bg-gradient-to-t from-gray-50 to-transparent dark:from-black dark:to-transparent opacity-80 pointer-events-none"></div>
