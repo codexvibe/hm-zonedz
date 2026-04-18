@@ -89,7 +89,7 @@ export const IntroLoader = () => {
                 onEnded={() => setPhase('branding')}
                 className="w-full h-full object-cover"
               >
-                <source src="/assets/PixVerse_V6_Image_Text_720P_je_veux_quand_il_o - Trim.mp4" type="video/mp4" />
+                <source src="/assets/intro.mp4" type="video/mp4" />
                 {/* Fallback image */}
                 <img src="/assets/hero_bg.png" alt="Fallback" className="w-full h-full object-cover" />
               </video>
