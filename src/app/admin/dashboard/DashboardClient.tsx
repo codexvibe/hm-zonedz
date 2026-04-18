@@ -754,7 +754,15 @@ export default function DashboardClient({ initialProducts }: { initialProducts: 
                             <option value="bg-yellow-500 text-black">🟡 Jaune Soleil</option>
                             <option value="bg-blue-600">🔵 Bleu Électrique</option>
                             <option value="bg-orange-500">🟠 Orange Feu</option>
-                          {formData.badge_color && !['bg-[#ef4444]', 'bg-[#39ff14] text-black', 'bg-[#ff00ff]', 'bg-yellow-500 text-black', 'bg-blue-600', 'bg-orange-500'].includes(formData.badge_color) && (
+                            <option value="bg-purple-600">🟣 Violet Royal</option>
+                            <option value="bg-cyan-500 text-black">💙 Cyan Ice</option>
+                            <option value="bg-pink-500">🩷 Rose Vif</option>
+                            <option value="bg-emerald-500">💚 Vert Émeraude</option>
+                            <option value="bg-rose-600">❤️ Rouge Profond</option>
+                            <option value="bg-amber-400 text-black">🌟 Or Flash</option>
+                            <option value="bg-indigo-600">💜 Indigo Nuit</option>
+                            <option value="bg-teal-500">🫐 Teal Premium</option>
+                            {formData.badge_color && !['bg-[#ef4444]', 'bg-[#39ff14] text-black', 'bg-[#ff00ff]', 'bg-yellow-500 text-black', 'bg-blue-600', 'bg-orange-500', 'bg-purple-600', 'bg-cyan-500 text-black', 'bg-pink-500', 'bg-emerald-500', 'bg-rose-600', 'bg-amber-400 text-black', 'bg-indigo-600', 'bg-teal-500'].includes(formData.badge_color) && (
                               <option value={formData.badge_color}>{formData.badge_color}</option>
                             )}
                           </select>
@@ -773,11 +781,16 @@ export default function DashboardClient({ initialProducts }: { initialProducts: 
                           <input type="text" value={formData.glow_color} placeholder="box-glow-green-hover" onChange={e => setFormData(prev => ({ ...prev, glow_color: e.target.value }))} className="w-full bg-[#111] border border-[#39ff14]/50 px-4 py-3 text-sm text-white focus:border-[#39ff14] outline-none transition-colors" />
                         ) : (
                           <select value={formData.glow_color} onChange={e => setFormData(prev => ({ ...prev, glow_color: e.target.value }))} className="w-full bg-[#111] border border-white/10 px-4 py-3 text-sm text-white focus:border-[#39ff14] outline-none transition-colors appearance-none cursor-pointer">
-                            <option value="box-glow-green-hover">Glow Vert</option>
-                            <option value="box-glow-pink-hover">Glow Magenta</option>
-                            <option value="box-glow-yellow-hover">Glow Jaune</option>
-                            <option value="box-glow-red-hover">Glow Rouge</option>
-                            {formData.glow_color && !['box-glow-green-hover', 'box-glow-pink-hover', 'box-glow-yellow-hover', 'box-glow-red-hover'].includes(formData.glow_color) && (
+                            <option value="box-glow-green-hover">💚 Glow Vert Néon</option>
+                            <option value="box-glow-pink-hover">💜 Glow Magenta</option>
+                            <option value="box-glow-yellow-hover">💛 Glow Jaune</option>
+                            <option value="box-glow-red-hover">❤️ Glow Rouge</option>
+                            <option value="box-glow-blue-hover">💙 Glow Bleu</option>
+                            <option value="box-glow-orange-hover">🧡 Glow Orange</option>
+                            <option value="box-glow-purple-hover">🟣 Glow Violet</option>
+                            <option value="box-glow-cyan-hover">💙 Glow Cyan</option>
+                            <option value="box-glow-white-hover">⬜ Glow Blanc</option>
+                            {formData.glow_color && !['box-glow-green-hover', 'box-glow-pink-hover', 'box-glow-yellow-hover', 'box-glow-red-hover', 'box-glow-blue-hover', 'box-glow-orange-hover', 'box-glow-purple-hover', 'box-glow-cyan-hover', 'box-glow-white-hover'].includes(formData.glow_color) && (
                               <option value={formData.glow_color}>{formData.glow_color}</option>
                             )}
                           </select>

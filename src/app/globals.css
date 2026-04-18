@@ -57,6 +57,21 @@
   .box-glow-pink-hover:hover {
     box-shadow: 0 0 15px rgba(255, 0, 255, 0.4);
   }
+  .box-glow-blue-hover:hover {
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+  }
+  .box-glow-orange-hover:hover {
+    box-shadow: 0 0 15px rgba(249, 115, 22, 0.5);
+  }
+  .box-glow-purple-hover:hover {
+    box-shadow: 0 0 15px rgba(168, 85, 247, 0.5);
+  }
+  .box-glow-cyan-hover:hover {
+    box-shadow: 0 0 15px rgba(6, 182, 212, 0.5);
+  }
+  .box-glow-white-hover:hover {
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.25);
+  }
   .glass-dark {
     background-color: rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(8px);
