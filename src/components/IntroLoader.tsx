@@ -24,10 +24,10 @@ export const IntroLoader = () => {
 
     setShow(true);
 
-    // Sécurité: Si la vidéo met trop de temps à charger ou n'existe pas, on passe au branding après 4s
+    // Sécurité: Si la vidéo met trop de temps à charger ou n'existe pas, on passe au branding après 12s
     const fallbackTimer = setTimeout(() => {
       if (phase === 'trunk') setPhase('branding');
-    }, 4500);
+    }, 12000);
 
     return () => clearTimeout(fallbackTimer);
   }, [phase]);
