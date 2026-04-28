@@ -53,9 +53,13 @@ CREATE TABLE IF NOT EXISTS orders (
 );
 
 -- Forcer la mise à jour de la table orders si elle existe déjà
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_name TEXT NOT NULL DEFAULT '';
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_phone TEXT NOT NULL DEFAULT '';
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_wilaya TEXT NOT NULL DEFAULT '';
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_address TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS items_list TEXT NOT NULL DEFAULT 'Non spécifié';
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS subtotal_price BIGINT DEFAULT 0;
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_price BIGINT DEFAULT 0;
-ALTER TABLE orders ADD COLUMN IF NOT EXISTS items_list TEXT DEFAULT 'Non spécifié';
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS total_price BIGINT NOT NULL DEFAULT 0;
 ALTER TABLE orders ALTER COLUMN status SET DEFAULT 'En attente';
 
@@ -70,6 +74,10 @@ BEGIN
     ALTER TABLE orders ALTER COLUMN total_price TYPE BIGINT USING total_price::BIGINT;
   END IF;
 END $$;
+
+-- Recharger le cache du schéma pour Supabase
+NOTIFY pgrst, 'reload schema';
+
 
 -- Table des Administrateurs
 CREATE TABLE IF NOT EXISTS admins (
