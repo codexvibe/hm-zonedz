@@ -66,17 +66,20 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
         customer_wilaya: wilaya,
         customer_address: address || 'Non précisée',
         items_list: productsSummary,
-        subtotal_price: subtotal,
-        delivery_price: deliveryPrice,
-        total_price: total,
+        subtotal_price: Math.round(subtotal),
+        delivery_price: Math.round(deliveryPrice),
+        total_price: Math.round(total),
         status: 'Nouveau'
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase insert error:', JSON.stringify(error));
+        throw new Error(error.message || 'Erreur Supabase inconnue');
+      }
       setIsSuccess(true);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Erreur Checkout:', err);
-      alert('Une erreur est survenue. Veuillez réessayer.');
+      alert(`Erreur: ${err?.message || 'Une erreur est survenue. Veuillez réessayer.'}`);
     } finally {
       setIsSubmitting(false);
     }
