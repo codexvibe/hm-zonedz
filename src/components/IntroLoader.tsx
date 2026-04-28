@@ -60,7 +60,7 @@ export const IntroLoader = () => {
         {/* Contenu central */}
         <div className="relative z-10 flex flex-col items-center">
           {/* Halo vert derrière le logo */}
-          <div className="absolute -inset-20 bg-[#39ff14]/10 rounded-full blur-[100px]" />
+          <div className="absolute -inset-20 bg-neon-green/10 rounded-full blur-[100px]" />
 
           {/* Logo */}
           <motion.div
@@ -69,13 +69,13 @@ export const IntroLoader = () => {
             transition={{ duration: 0.6, ease: "easeOut" }}
             className="mb-8 relative"
           >
-            <div className="absolute inset-0 bg-[#39ff14]/20 blur-2xl rounded-full animate-pulse" />
+            <div className="absolute inset-0 bg-neon-green/20 blur-2xl rounded-full animate-pulse" />
             <Image
               src="/assets/logo.jpg"
               alt="HM.ZONEDZ Logo"
               width={150}
               height={150}
-              className="rounded-2xl relative z-10 border border-[#39ff14]/40 shadow-[0_0_40px_rgba(57,255,20,0.2)]"
+              className="rounded-2xl relative z-10 border border-neon-green/40 shadow-[0_0_40px_rgba(57,255,20,0.2)]"
             />
           </motion.div>
 
@@ -87,7 +87,7 @@ export const IntroLoader = () => {
             className="text-center mb-12"
           >
             <h1 className="font-heading text-5xl md:text-7xl text-white tracking-widest uppercase">
-              HM.ZONE<span className="text-[#39ff14]">DZ</span>
+              HM.ZONE<span className="text-neon-green">DZ</span>
             </h1>
             <p className="text-white/50 text-[10px] md:text-xs tracking-[0.5em] font-bold mt-3 uppercase">
               N°1 EN ALGÉRIE
@@ -97,7 +97,7 @@ export const IntroLoader = () => {
           {/* Barre de progression verte */}
           <div className="w-72 h-[2px] bg-white/10 relative overflow-hidden rounded-full">
             <motion.div
-              className="absolute left-0 top-0 h-full bg-[#39ff14] shadow-[0_0_20px_#39ff14,0_0_40px_rgba(57,255,20,0.5)]"
+              className="absolute left-0 top-0 h-full bg-neon-green shadow-[0_0_20px_#39ff14,0_0_40px_rgba(57,255,20,0.5)]"
               initial={{ width: "0%" }}
               animate={{ width: `${progress}%` }}
               transition={{ ease: "linear" }}
@@ -105,7 +105,7 @@ export const IntroLoader = () => {
           </div>
 
           <div className="mt-4 flex flex-col items-center gap-1">
-            <span className="text-[13px] font-mono font-bold text-[#39ff14] tracking-[0.2em]">
+            <span className="text-[13px] font-mono font-bold text-neon-green tracking-[0.2em]">
               {Math.round(progress)}%
             </span>
             <motion.span

@@ -7,28 +7,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { createClient } from '../utils/supabase/client';
 import { useCart } from '../context/CartContext';
+import { Product, FALLBACK_PRODUCTS } from '../data/products';
 
 const supabase = createClient();
 
-interface Product {
-  id: number;
-  name: string;
-  category: string;
-  price: string;
-  oldPrice: string | null;
-  image: string;
-  badge: string;
-  badgeColor: string;
-  glowColor: string;
-  flavors?: (string | { name: string; detail: string })[];
-}
-
-const fallbackProducts: Product[] = [
-  { id: 1, name: 'PABLO ICE COLD', category: 'Snus', price: '1 200 DZD', oldPrice: '1 500 DZD', image: '/assets/snus_pablo.png', badge: 'TOP VENTE 🔥', badgeColor: 'bg-[#ef4444]', glowColor: 'box-glow-green-hover' },
-  { id: 2, name: 'KILLA COLD MINT', category: 'Snus', price: '1 100 DZD', oldPrice: null, image: '/assets/snus_pablo.png', badge: 'FORT 💪', badgeColor: 'bg-[#ff00ff]', glowColor: 'hover:shadow-[0_0_25px_rgba(255,0,255,0.6)]' },
-  { id: 3, name: 'RABBIT BLUE ICE', category: 'Snus', price: '1 300 DZD', oldPrice: null, image: '/assets/snus_pablo.png', badge: 'NEW BRAND', badgeColor: 'bg-blue-400 text-black', glowColor: 'box-glow-green-hover' },
-  { id: 4, name: 'VELO FREEZE MAX', category: 'Snus', price: '1 000 DZD', oldPrice: null, image: '/assets/snus_pablo.png', badge: 'DISCRET', badgeColor: 'bg-white text-black border', glowColor: 'box-glow-green-hover' }
-];
 
 export const BestSellers = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -41,7 +23,7 @@ export const BestSellers = () => {
       setIsLoading(true);
       // Si les clés Supabase ne sont pas configurées, on garde le fallback
       if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'YOUR_SUPABASE_URL') {
-        setProducts(fallbackProducts);
+        setProducts(FALLBACK_PRODUCTS.slice(0, 4));
         setIsLoading(false);
         return;
       }
@@ -66,7 +48,7 @@ export const BestSellers = () => {
             badge: item.badge,
             badgeColor: (() => {
               const c = item.badge_color;
-              if (!c || c.includes('bg-white') || c.includes('bg-gray') || c.includes('bg-slate')) return 'bg-[#ef4444]';
+              if (!c || c.includes('bg-white') || c.includes('bg-gray') || c.includes('bg-slate')) return 'bg-neon-red';
               return c;
             })(),
             glowColor: item.glow_color || 'box-glow-green-hover',
@@ -75,12 +57,12 @@ export const BestSellers = () => {
           setProducts(mappedData);
         } else {
           if (!data || data.length === 0) {
-            setProducts(fallbackProducts);
+            setProducts(FALLBACK_PRODUCTS.slice(0, 4));
           }
         }
       } catch (err) {
         console.error('Erreur Supabase, fallback utilisé:', err);
-        setProducts(fallbackProducts);
+        setProducts(FALLBACK_PRODUCTS.slice(0, 4));
       } finally {
         setIsLoading(false);
       }
@@ -91,20 +73,20 @@ export const BestSellers = () => {
 
   return (
     <section className="py-20 bg-gray-50 dark:bg-black relative" id="shop">
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-size-[24px_24px]"></div>
       
       <div className="container mx-auto px-4 relative z-10">
         
-        <div className="flex flex-col md:flex-row justify-between items-end mb-12 border-b border-black/10 dark:border-[#0f0f0f] pb-6">
+        <div className="flex flex-col md:flex-row justify-between items-end mb-12 border-b border-black/10 dark:border-surface pb-6">
           <div>
             <h2 className="text-5xl md:text-7xl font-heading text-black dark:text-white mb-2 uppercase">
-              NOS MEILLEURES <span className="text-[#ef4444]">VENTES</span>
+              NOS MEILLEURES <span className="text-neon-red">VENTES</span>
             </h2>
-            <p className="text-[#a1a1aa] text-lg font-sans">Les références les plus demandées en Algérie. Quantité limitée.</p>
+            <p className="text-text-muted text-lg font-sans">Les références les plus demandées en Algérie. Quantité limitée.</p>
           </div>
           <Link 
             href="/shop" 
-            className="hidden md:inline-block text-[#39ff14] hover:text-black dark:hover:text-white font-heading text-xl uppercase transition-colors tracking-widest underline underline-offset-8 mt-4"
+            className="hidden md:inline-block text-neon-green hover:text-black dark:hover:text-white font-heading text-xl uppercase transition-colors tracking-widest underline underline-offset-8 mt-4"
           >
             VOIR TOUT LE STOCK ➔
           </Link>
@@ -113,7 +95,7 @@ export const BestSellers = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {isLoading ? (
             [...Array(4)].map((_, i) => (
-              <div key={i} className="bg-white dark:bg-[#0f0f0f] border border-black/5 p-4 flex flex-col h-[400px] animate-pulse">
+              <div key={i} className="bg-white dark:bg-surface border border-black/5 p-4 flex flex-col h-[400px] animate-pulse">
                 <div className="h-64 w-full bg-gray-200 dark:bg-white/5 rounded-sm mb-6" />
                 <div className="h-4 w-24 bg-gray-200 dark:bg-white/5 rounded mb-2" />
                 <div className="h-8 w-full bg-gray-200 dark:bg-white/5 rounded mb-4" />
@@ -127,7 +109,7 @@ export const BestSellers = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 key={product.id}
-                className={`bg-white dark:bg-[#0f0f0f] border border-black/5 dark:border-white/5 p-4 flex flex-col group transition-all duration-500 hover:-translate-y-3 hover:shadow-xl ${product.glowColor} relative`}
+                className={`bg-white dark:bg-surface border border-black/5 dark:border-white/5 p-4 flex flex-col group transition-all duration-500 hover:-translate-y-3 hover:shadow-xl ${product.glowColor} relative`}
                 onClick={() => {
                   import('../app/admin/actions').then(m => m.incrementProductViewAction(product.id));
                 }}
@@ -148,7 +130,7 @@ export const BestSellers = () => {
 
                 <div className="flex-1">
                   <div className="flex justify-between items-start mb-2 mt-4 relative z-10">
-                    <span className="text-[10px] font-bold text-[#a1a1aa] uppercase tracking-widest">{product.category}</span>
+                    <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">{product.category}</span>
                     {product.badge && (
                       <span className={`px-2.5 py-1 ${product.badgeColor} text-white font-heading text-xs tracking-wider uppercase shadow-sm`}>
                         {product.badge}
@@ -157,13 +139,13 @@ export const BestSellers = () => {
                   </div>
                   
                   <Link href={`/product/${product.id}`} className="block group/link">
-                    <h3 className="font-heading text-xl text-black dark:text-white mb-2 uppercase group-hover/link:text-[#39ff14] transition-colors">{product.name}</h3>
+                    <h3 className="font-heading text-xl text-black dark:text-white mb-2 uppercase group-hover/link:text-neon-green transition-colors">{product.name}</h3>
                   </Link>
                   
                   <div className="flex items-baseline gap-2 mb-4">
-                    <span className="text-xl font-bold font-sans text-[#39ff14]">{product.price}</span>
+                    <span className="text-xl font-bold font-sans text-neon-green">{product.price}</span>
                     {product.oldPrice && (
-                      <span className="text-sm font-bold font-sans text-[#ef4444] line-through">
+                      <span className="text-sm font-bold font-sans text-neon-red line-through">
                         {product.oldPrice}
                       </span>
                     )}
@@ -184,7 +166,7 @@ export const BestSellers = () => {
                           : (firstFlavor as any)?.name || '';
                         addToCart(product as any, flavor);
                       }}
-                      className="flex-1 bg-[#39ff14] hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black text-black font-heading py-2 text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2"
+                      className="flex-1 bg-neon-green hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black text-black font-heading py-2 text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2"
                     >
                       <ShoppingCart size={14} /> Acheter
                     </button>
@@ -198,7 +180,7 @@ export const BestSellers = () => {
         <div className="mt-8 text-center md:hidden">
           <Link 
             href="/shop" 
-            className="inline-block text-[#39ff14] hover:text-black dark:hover:text-white font-heading text-xl uppercase transition-colors tracking-widest underline underline-offset-8"
+            className="inline-block text-neon-green hover:text-black dark:hover:text-white font-heading text-xl uppercase transition-colors tracking-widest underline underline-offset-8"
           >
             VOIR TOUT LE STOCK ➔
           </Link>

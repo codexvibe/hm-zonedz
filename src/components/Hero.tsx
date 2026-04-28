@@ -17,7 +17,7 @@ export const Hero = () => {
         }}
       />
       
-      <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-white/30 dark:from-black dark:via-black/80 dark:to-black/30" />
+      <div className="absolute inset-0 bg-linear-to-t from-white via-white/80 to-white/30 dark:from-black dark:via-black/80 dark:to-black/30" />
       <div className="absolute inset-0 bg-white/40 dark:bg-black/40" />
 
       {/* Content */}
@@ -27,9 +27,9 @@ export const Hero = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="mb-6 inline-flex items-center gap-2 bg-[#39ff14]/10 border border-[#39ff14] text-[#39ff14] px-4 py-1.5 rounded-full font-bold tracking-widest text-xs md:text-sm uppercase box-glow-green"
+          className="mb-6 inline-flex items-center gap-2 bg-neon-green/10 border border-neon-green text-neon-green px-4 py-1.5 rounded-full font-bold tracking-widest text-xs md:text-sm uppercase box-glow-green"
         >
-          <span className="w-2 h-2 rounded-full bg-[#39ff14] animate-pulse"></span>
+          <span className="w-2 h-2 rounded-full bg-neon-green animate-pulse"></span>
           EN STOCK - LIVRAISON 58 WILAYAS
         </motion.div>
 
@@ -39,14 +39,14 @@ export const Hero = () => {
           transition={{ duration: 0.5, type: "spring", bounce: 0.4 }}
           className="font-heading text-6xl sm:text-7xl md:text-9xl text-black dark:text-white leading-none mb-2 select-none uppercase"
         >
-          HM.ZONE<span className="text-[#39ff14] text-glow-green">DZ</span>
+          HM.ZONE<span className="text-neon-green text-glow-green">DZ</span>
         </motion.h1>
 
         <motion.h2 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          className="font-heading text-3xl md:text-5xl text-[#ff00ff] tracking-wide mb-8 uppercase"
+          className="font-heading text-3xl md:text-5xl text-neon-pink tracking-wide mb-8 uppercase"
         >
           N°1 EN ALGÉRIE <span className="text-black dark:text-white opacity-50 mx-2">|</span> GROS & DÉTAIL
         </motion.h2>
@@ -55,7 +55,7 @@ export const Hero = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.6 }}
-          className="text-lg md:text-2xl text-[#a1a1aa] font-sans font-medium mb-12 max-w-2xl"
+          className="text-lg md:text-2xl text-text-muted font-sans font-medium mb-12 max-w-2xl"
         >
           Goûts puissants. Style unique. Attention à la contrefaçon ❌. L'original est ici.
         </motion.p>
@@ -68,7 +68,7 @@ export const Hero = () => {
         >
           <Link 
             href="/shop"
-            className="flex-1 sm:flex-none flex items-center justify-center gap-3 bg-[#39ff14] text-black font-heading text-xl px-8 py-4 uppercase hover:bg-white hover:text-black transition-all box-glow-green"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-3 bg-neon-green text-black font-heading text-xl px-8 py-4 uppercase hover:bg-white hover:text-black transition-all box-glow-green"
           >
             <ShoppingBag size={24} />
             Voir la Boutique
@@ -82,9 +82,9 @@ export const Hero = () => {
            className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
         >
           <span className="text-black/50 dark:text-white/50 text-xs font-bold tracking-widest uppercase">Découvrir</span>
-          <div className="w-[1px] h-12 bg-black/20 dark:bg-white/20 relative overflow-hidden">
+          <div className="w-px h-12 bg-black/20 dark:bg-white/20 relative overflow-hidden">
             <motion.div 
-              className="absolute top-0 left-0 w-full h-1/2 bg-[#39ff14]"
+              className="absolute top-0 left-0 w-full h-1/2 bg-neon-green"
               animate={{ y: [0, 48, 0] }}
               transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
             />

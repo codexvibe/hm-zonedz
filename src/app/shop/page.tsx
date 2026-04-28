@@ -9,55 +9,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { createClient } from '../../utils/supabase/client';
 import { useCart } from '../../context/CartContext';
+import { Product, FALLBACK_PRODUCTS, DEFAULT_CATEGORIES } from '../../data/products';
 
 const supabase = createClient();
 
-interface Product {
-  id: number;
-  name: string;
-  category: string;
-  price: string;
-  oldPrice: string | null;
-  image: string;
-  badge: string;
-  badgeColor: string;
-  glowColor: string;
-  flavors?: (string | { name: string; detail: string })[];
-}
-
-const fallbackProducts: Product[] = [
-  { id: 1, name: 'PABLO ICE COLD', category: 'Snus', price: '1 200 DZD', oldPrice: '1 500 DZD', image: '/assets/snus_pablo.png', badge: 'TOP VENTE 🔥', badgeColor: 'bg-[#ef4444]', glowColor: 'box-glow-green-hover' },
-  { id: 2, name: 'KILLA COLD MINT', category: 'Snus', price: '1 100 DZD', oldPrice: null, image: '/assets/snus_pablo.png', badge: 'FORT 💪', badgeColor: 'bg-[#ff00ff]', glowColor: 'hover:shadow-[0_0_25px_rgba(255,0,255,0.6)]' },
-  { id: 3, name: 'RABBIT BLUE ICE', category: 'Snus', price: '1 300 DZD', oldPrice: null, image: '/assets/snus_pablo.png', badge: 'NEW BRAND', badgeColor: 'bg-blue-400 text-black', glowColor: 'box-glow-green-hover' },
-  { id: 4, name: 'VELO FREEZE MAX', category: 'Snus', price: '1 000 DZD', oldPrice: null, image: '/assets/snus_pablo.png', badge: 'DISCRET', badgeColor: 'bg-white text-black border', glowColor: 'box-glow-green-hover' },
-  { id: 5, name: 'TORNADO 9000 PRO', category: 'Puff 9k', price: '3 500 DZD', oldPrice: null, image: '/assets/vape_tornado.png', badge: '9000 PUFFS ⚡', badgeColor: 'bg-[#facc15] text-black', glowColor: 'hover:shadow-[0_0_25px_rgba(250,204,21,0.6)]' },
-  { id: 6, name: 'TORNADO 12000 PRO', category: 'Puff 12k', price: '4 200 DZD', oldPrice: null, image: '/assets/vape_tornado.png', badge: '12000 PUFFS 🚀', badgeColor: 'bg-orange-600', glowColor: 'hover:shadow-[0_0_25px_rgba(249,115,22,0.6)]' },
-  { id: 7, name: 'JNR ROCKET 25K', category: 'Puff 25k', price: '4 500 DZD', oldPrice: '5 000 DZD', image: '/assets/vape_tornado.png', badge: 'MAX PUFFS 🌪️', badgeColor: 'bg-blue-600', glowColor: 'hover:shadow-[0_0_25px_rgba(37,99,235,0.6)]' },
-  { id: 8, name: 'JNR ALIEN 10K', category: 'Puff 10k', price: '4 000 DZD', oldPrice: null, image: '/assets/vape_tornado.png', badge: 'PROMO 🎁', badgeColor: 'bg-[#39ff14] text-black', glowColor: 'box-glow-green-hover' },
-  { id: 9, name: 'SALT E-LIQUID MENTHE', category: 'E-Liquides', price: '1 500 DZD', oldPrice: null, image: '/assets/vape_tornado.png', badge: 'NIC SALT', badgeColor: 'bg-indigo-600', glowColor: 'box-glow-green-hover' },
-  { id: 10, name: 'BIG BOY 100ML', category: 'E-Liquides', price: '2 500 DZD', oldPrice: '3 000 DZD', image: '/assets/vape_tornado.png', badge: 'FORMAT XL', badgeColor: 'bg-green-600', glowColor: 'box-glow-green-hover' },
-  { id: 11, name: 'PACK SNUS 10 PCS', category: 'Gros', price: '10 000 DZD', oldPrice: '12 000 DZD', image: '/assets/snus_pablo.png', badge: 'VENTE EN GROS', badgeColor: 'bg-black text-yellow-400', glowColor: 'box-glow-green-hover' },
-  { id: 12, name: 'PACK PUFF 5 PCS', category: 'Gros', price: '15 000 DZD', oldPrice: null, image: '/assets/vape_tornado.png', badge: 'PRIX DE GROS', badgeColor: 'bg-black text-blue-400', glowColor: 'box-glow-green-hover' },
-  { id: 13, name: 'RÉSISTANCE TORNADO', category: 'Accessoires', price: '800 DZD', oldPrice: null, image: '/assets/vape_tornado.png', badge: 'PIÈCE ORIGINALE', badgeColor: 'bg-slate-500', glowColor: 'box-glow-green-hover' },
-  { id: 14, name: 'CHARGEUR USB-C RAPIDE', category: 'Accessoires', price: '1 200 DZD', oldPrice: null, image: '/assets/vape_tornado.png', badge: 'ESSENTIEL', badgeColor: 'bg-slate-800', glowColor: 'box-glow-green-hover' },
-  { id: 15, name: 'BATTERIE 18650', category: 'Accessoires', price: '1 500 DZD', oldPrice: null, image: '/assets/vape_tornado.png', badge: 'PUISSANCE', badgeColor: 'bg-red-800', glowColor: 'box-glow-green-hover' },
-  { id: 16, name: 'ÉTUI DE TRANSPORT', category: 'Accessoires', price: '900 DZD', oldPrice: null, image: '/assets/vape_tornado.png', badge: 'PROTECTION', badgeColor: 'bg-gray-700', glowColor: 'box-glow-green-hover' }
-];
-
-const DEFAULT_CATEGORIES = [
-  'Toutes', 
-  'Promotions', 
-  'Snus', 
-  'Vape Jetable', 
-  'Puff', 
-  'Puff 9k', 
-  'Puff 12k', 
-  'Puff 15k', 
-  'Puff 25k', 
-  'E-Liquides', 
-  'Gros', 
-  'Accessoires'
-];
   // Les catégories dynamiques seront générées à partir des produits.
 
 export default function Shop() {
@@ -87,7 +42,7 @@ export default function Shop() {
       setIsLoading(true);
       // Si les clés Supabase ne sont pas configurées, on garde le fallback
       if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'YOUR_SUPABASE_URL') {
-        setProducts(fallbackProducts);
+        setProducts(FALLBACK_PRODUCTS);
         setIsLoading(false);
         return;
       }
@@ -122,12 +77,12 @@ export default function Shop() {
           // Généralement si l'utilisateur a sa propre DB, s'il n'y a rien, on montre vide ou fallback.
           // Je vais remettre le fallback seulement s'il n'y a VRAIMENT rien du tout trouvé.
           if (!data || data.length === 0) {
-            setProducts(fallbackProducts);
+            setProducts(FALLBACK_PRODUCTS);
           }
         }
       } catch (err) {
         console.error('Erreur Supabase, fallback utilisé:', err);
-        setProducts(fallbackProducts);
+        setProducts(FALLBACK_PRODUCTS);
       } finally {
         setIsLoading(false);
       }
@@ -154,9 +109,9 @@ export default function Shop() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 border-b border-black/10 dark:border-white/10 pb-6 gap-6">
             <div>
               <h1 className="text-5xl md:text-7xl font-heading text-black dark:text-white mb-2 uppercase">
-                NOTRE <span className="text-[#39ff14]">STOCK</span>
+                NOTRE <span className="text-neon-green">STOCK</span>
               </h1>
-              <p className="text-[#a1a1aa] font-sans">Livraison dans tout le territoire national (58 wilayas).</p>
+              <p className="text-text-muted font-sans">Livraison dans tout le territoire national (58 wilayas).</p>
             </div>
             
             <button 
@@ -173,7 +128,7 @@ export default function Shop() {
             <aside className="hidden md:block w-64 shrink-0">
               <div className="sticky top-40 bg-white dark:bg-[#0f0f0f] border border-black/10 dark:border-white/10 p-6">
                 <h3 className="font-heading text-2xl text-black dark:text-white mb-6 flex items-center gap-2 uppercase">
-                  <LayoutGrid size={20} className="text-[#39ff14]" />
+                  <LayoutGrid size={20} className="text-neon-green" />
                   Catégories
                 </h3>
                 <ul className="flex flex-col gap-3 font-sans">
@@ -183,8 +138,8 @@ export default function Shop() {
                         onClick={() => setActiveCategory(cat)}
                         className={`w-full text-left py-2 px-3 transition-colors ${
                           activeCategory === cat 
-                            ? 'bg-[#39ff14] text-black font-bold' 
-                            : 'text-gray-600 hover:text-black hover:bg-black/5 dark:text-[#a1a1aa] dark:hover:text-white dark:hover:bg-white/5'
+                            ? 'bg-neon-green text-black font-bold' 
+                            : 'text-gray-600 hover:text-black hover:bg-black/5 dark:text-text-muted dark:hover:text-white dark:hover:bg-white/5'
                         }`}
                       >
                         {cat}
@@ -243,13 +198,13 @@ export default function Shop() {
                           </div>
 
                           <div className="flex-1 flex flex-col">
-                            <span className="text-xs text-[#a1a1aa] font-bold tracking-widest uppercase mb-1">{product.category}</span>
+                            <span className="text-xs text-text-muted font-bold tracking-widest uppercase mb-1">{product.category}</span>
                             <h3 className="font-heading text-xl md:text-2xl text-black dark:text-white mb-2">{product.name}</h3>
                             
                             <div className="flex items-center gap-3 mb-6">
-                              <span className="text-2xl font-bold font-sans text-[#39ff14]">{product.price}</span>
+                              <span className="text-2xl font-bold font-sans text-neon-green">{product.price}</span>
                               {product.oldPrice && (
-                                <span className="text-base font-bold font-sans text-[#ef4444] line-through">{product.oldPrice}</span>
+                                <span className="text-base font-bold font-sans text-neon-red line-through">{product.oldPrice}</span>
                               )}
                             </div>
 
@@ -279,7 +234,7 @@ export default function Shop() {
                                     : (firstFlavor as any)?.name || '';
                                   addToCart(product as any, flavor);
                                 }}
-                                className="flex-1 bg-[#39ff14] hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black text-black font-heading py-2 text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2"
+                                className="flex-1 bg-neon-green hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black text-black font-heading py-2 text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2"
                               >
                                 <ShoppingCart size={14} /> Acheter
                               </button>
@@ -292,7 +247,7 @@ export default function Shop() {
                   
                   {filteredProducts.length === 0 && (
                     <div className="text-center py-20">
-                      <p className="text-2xl font-heading text-[#a1a1aa] uppercase">Aucun produit dans cette catégorie.</p>
+                      <p className="text-2xl font-heading text-text-muted uppercase">Aucun produit dans cette catégorie.</p>
                     </div>
                   )}
                 </>
@@ -317,7 +272,7 @@ export default function Shop() {
             <div className="flex justify-between items-center px-6 pb-6 border-b border-black/10 dark:border-white/10">
               <h2 className="font-heading text-3xl text-black dark:text-white uppercase">Filtres</h2>
               <button 
-                className="text-black dark:text-white p-2 hover:text-[#ef4444]"
+                className="text-black dark:text-white p-2 hover:text-neon-red"
                 onClick={() => setIsMobileFiltersOpen(false)}
               >
                 <X size={32} />
@@ -335,7 +290,7 @@ export default function Shop() {
                       }}
                       className={`w-full text-left py-4 px-4 border ${
                         activeCategory === cat 
-                          ? 'bg-[#39ff14] text-black border-[#39ff14] font-bold' 
+                          ? 'bg-neon-green text-black border-neon-green font-bold' 
                           : 'text-black dark:text-white border-black/20 dark:border-white/20'
                       } uppercase font-heading`}
                     >

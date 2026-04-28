@@ -51,17 +51,17 @@ export default function Wholesale() {
 
   const benefits = [
     {
-      icon: <Package className="text-[#39ff14]" size={32} />,
+      icon: <Package className="text-neon-green" size={32} />,
       title: "Stock Permanent",
       desc: "Accès prioritaire à toutes les nouveautés Snus et Vapes."
     },
     {
-      icon: <Truck className="text-[#39ff14]" size={32} />,
+      icon: <Truck className="text-neon-green" size={32} />,
       title: "Logistique 58 Wilayas",
       desc: "Expédition rapide et sécurisée partout en Algérie."
     },
     {
-      icon: <CheckCircle className="text-[#39ff14]" size={32} />,
+      icon: <CheckCircle className="text-neon-green" size={32} />,
       title: "100% Original",
       desc: "Garantie contre la contrefaçon pour protéger votre réputation."
     }
@@ -79,20 +79,20 @@ export default function Wholesale() {
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="inline-flex items-center gap-2 bg-[#ef4444]/10 border border-[#ef4444] text-[#ef4444] px-4 py-2 rounded-sm font-heading mb-6 tracking-widest uppercase"
+              className="inline-flex items-center gap-2 bg-neon-red/10 border border-neon-red text-neon-red px-4 py-2 rounded-sm font-heading mb-6 tracking-widest uppercase"
             >
               Service Professionnel (B2B)
             </motion.div>
             <h1 className="text-6xl md:text-8xl font-heading uppercase mb-6 leading-none">
-              Acheter en <span className="text-[#39ff14]">Gros</span>
+              Acheter en <span className="text-neon-green">Gros</span>
             </h1>
-            <p className="text-xl text-[#a1a1aa] font-sans max-w-2xl mx-auto mb-10">
+            <p className="text-xl text-text-muted font-sans max-w-2xl mx-auto mb-10">
               Vous êtes gérant d'un store ou revendeur ? Bénéficiez des meilleurs prix d'Algérie sur le Snus et les Vapes Jetables.
             </p>
             
             {/* Condition Badge */}
-            <div className="inline-block bg-white dark:bg-[#0f0f0f] border-2 border-dashed border-[#39ff14]/30 px-8 py-4 rounded-sm">
-              <p className="text-[#39ff14] font-heading text-2xl uppercase tracking-tighter">
+            <div className="inline-block bg-white dark:bg-surface border-2 border-dashed border-neon-green/30 px-8 py-4 rounded-sm">
+              <p className="text-neon-green font-heading text-2xl uppercase tracking-tighter">
                 Minimum de commande : <span className="text-black dark:text-white underline">10 pièces</span>
               </p>
             </div>
@@ -109,13 +109,13 @@ export default function Wholesale() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="bg-white dark:bg-[#0a0a0a] border border-black/5 dark:border-white/5 p-8 flex flex-col items-center text-center group hover:border-[#39ff14]/30 transition-colors"
+                className="bg-white dark:bg-[#0a0a0a] border border-black/5 dark:border-white/5 p-8 flex flex-col items-center text-center group hover:border-neon-green/30 transition-colors"
               >
                 <div className="w-16 h-16 bg-black/5 dark:bg-white/5 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   {b.icon}
                 </div>
                 <h3 className="text-2xl font-heading uppercase mb-3 text-black dark:text-white">{b.title}</h3>
-                <p className="text-[#a1a1aa] font-sans">{b.desc}</p>
+                <p className="text-text-muted font-sans">{b.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -124,13 +124,13 @@ export default function Wholesale() {
         {/* Form Section */}
         <section className="container mx-auto px-4 relative">
           {/* Background decoration */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] bg-[#39ff14]/5 blur-[120px] rounded-full -z-10 pointer-events-none" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] bg-neon-green/5 blur-[120px] rounded-full -z-10 pointer-events-none" />
           
-          <div className="max-w-2xl mx-auto bg-white dark:bg-[#0f0f0f] border border-black/10 dark:border-white/10 overflow-hidden relative shadow-xl">
+          <div className="max-w-2xl mx-auto bg-white dark:bg-surface border border-black/10 dark:border-white/10 overflow-hidden relative shadow-xl">
             
-            <div className="bg-gradient-to-r from-[#39ff14]/20 to-transparent p-6 border-b border-[#39ff14]/20">
+            <div className="bg-linear-to-r from-neon-green/20 to-transparent p-6 border-b border-neon-green/20">
               <h2 className="text-3xl font-heading uppercase text-black dark:text-white">Demande de prix de gros</h2>
-              <p className="text-sm text-[#a1a1aa] font-medium uppercase tracking-widest mt-1">Réponse garantie sous 24h</p>
+              <p className="text-sm text-text-muted font-medium uppercase tracking-widest mt-1">Réponse garantie sous 24h</p>
             </div>
 
             <div className="p-8">
@@ -140,16 +140,16 @@ export default function Wholesale() {
                   animate={{ opacity: 1, scale: 1 }}
                   className="py-12 flex flex-col items-center text-center gap-6"
                 >
-                  <div className="w-20 h-20 bg-[#39ff14]/10 rounded-full flex items-center justify-center">
-                    <CheckCircle className="text-[#39ff14]" size={48} />
+                  <div className="w-20 h-20 bg-neon-green/10 rounded-full flex items-center justify-center">
+                    <CheckCircle className="text-neon-green" size={48} />
                   </div>
                   <h3 className="text-3xl font-heading uppercase">Demande envoyée !</h3>
-                  <p className="text-[#a1a1aa] font-sans">
+                  <p className="text-text-muted font-sans">
                     Merci pour votre confiance. Nous allons vous contacter par téléphone pour discuter des tarifs de gros.
                   </p>
                   <button
                     onClick={() => setIsSuccess(false)}
-                    className="mt-4 px-8 py-3 border border-[#39ff14] text-[#39ff14] font-heading uppercase hover:bg-[#39ff14] hover:text-black transition-colors"
+                    className="mt-4 px-8 py-3 border border-neon-green text-neon-green font-heading uppercase hover:bg-neon-green hover:text-black transition-colors"
                   >
                     Envoyer une autre demande
                   </button>
@@ -159,7 +159,7 @@ export default function Wholesale() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     {/* Nom Magasin */}
                     <div className="flex flex-col gap-2">
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-[#a1a1aa]">Nom du Magasin / Responsable *</label>
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Nom du Magasin / Responsable *</label>
                       <div className="relative">
                         <Building2 size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#555]" />
                         <input
@@ -168,14 +168,14 @@ export default function Wholesale() {
                           placeholder="Ex: Vape Store Alger"
                           value={formData.company}
                           onChange={(e) => setFormData({...formData, company: e.target.value})}
-                          className="w-full bg-gray-50 dark:bg-[#050505] border border-black/10 dark:border-white/10 text-black dark:text-white pl-10 pr-4 py-4 focus:border-[#39ff14] dark:focus:border-[#39ff14] outline-none transition-colors"
+                          className="w-full bg-gray-50 dark:bg-[#050505] border border-black/10 dark:border-white/10 text-black dark:text-white pl-10 pr-4 py-4 focus:border-neon-green dark:focus:border-neon-green outline-none transition-colors"
                         />
                       </div>
                     </div>
 
                     {/* Téléphone */}
                     <div className="flex flex-col gap-2">
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-[#a1a1aa]">Téléphone Mobile *</label>
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Téléphone Mobile *</label>
                       <div className="relative">
                         <Phone size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#555]" />
                         <input
@@ -184,7 +184,7 @@ export default function Wholesale() {
                           placeholder="05 / 06 / 07 ..."
                           value={formData.phone}
                           onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                          className="w-full bg-gray-50 dark:bg-[#050505] border border-black/10 dark:border-white/10 text-black dark:text-white pl-10 pr-4 py-4 focus:border-[#39ff14] dark:focus:border-[#39ff14] outline-none transition-colors"
+                          className="w-full bg-gray-50 dark:bg-[#050505] border border-black/10 dark:border-white/10 text-black dark:text-white pl-10 pr-4 py-4 focus:border-neon-green dark:focus:border-neon-green outline-none transition-colors"
                         />
                       </div>
                     </div>
@@ -192,14 +192,14 @@ export default function Wholesale() {
 
                   {/* Wilaya */}
                   <div className="flex flex-col gap-2">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-[#a1a1aa]">Votre Wilaya *</label>
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Votre Wilaya *</label>
                     <div className="relative">
                       <MapPin size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#555]" />
                       <select
                         required
                         value={formData.wilaya}
                         onChange={(e) => setFormData({...formData, wilaya: e.target.value})}
-                        className="w-full bg-gray-50 dark:bg-[#050505] border border-black/10 dark:border-white/10 text-black dark:text-white pl-10 pr-4 py-4 focus:border-[#39ff14] dark:focus:border-[#39ff14] outline-none transition-colors appearance-none cursor-pointer"
+                        className="w-full bg-gray-50 dark:bg-[#050505] border border-black/10 dark:border-white/10 text-black dark:text-white pl-10 pr-4 py-4 focus:border-neon-green dark:focus:border-neon-green outline-none transition-colors appearance-none cursor-pointer"
                       >
                         <option value="">Sélectionnez une wilaya</option>
                         {WILAYAS.map(w => <option key={w} value={w}>{w}</option>)}
@@ -210,13 +210,13 @@ export default function Wholesale() {
 
                   {/* Message */}
                   <div className="flex flex-col gap-2">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-[#a1a1aa]">Quels produits vous intéressent ?</label>
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Quels produits vous intéressent ?</label>
                     <textarea
                       rows={4}
                       placeholder="Ex: Snus Pablo Ice Cold (30 boites), Tornado 9K (20 pièces)..."
                       value={formData.message}
                       onChange={(e) => setFormData({...formData, message: e.target.value})}
-                      className="w-full bg-gray-50 dark:bg-[#050505] border border-black/10 dark:border-white/10 text-black dark:text-white p-4 focus:border-[#39ff14] dark:focus:border-[#39ff14] outline-none transition-colors resize-none"
+                      className="w-full bg-gray-50 dark:bg-[#050505] border border-black/10 dark:border-white/10 text-black dark:text-white p-4 focus:border-neon-green dark:focus:border-neon-green outline-none transition-colors resize-none"
                     />
                   </div>
 
@@ -224,7 +224,7 @@ export default function Wholesale() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="mt-4 w-full bg-[#39ff14] text-black font-heading text-2xl py-5 uppercase flex items-center justify-center gap-3 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(57,255,20,0.2)]"
+                    className="mt-4 w-full bg-neon-green text-black font-heading text-2xl py-5 uppercase flex items-center justify-center gap-3 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(57,255,20,0.2)]"
                   >
                     {isSubmitting ? <Loader2 className="animate-spin" /> : <Send size={24} />}
                     {isSubmitting ? "Envoi en cours..." : "Demander mes tarifs pro"}

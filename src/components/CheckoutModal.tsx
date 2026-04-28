@@ -88,7 +88,7 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
 
   return (
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center p-4 overflow-y-auto"
+      className="fixed inset-0 z-200 flex items-center justify-center p-4 overflow-y-auto"
       style={{ opacity: visible ? 1 : 0, transition: 'opacity 0.2s ease' }}
     >
       <div className="fixed inset-0 bg-black/85" onClick={handleClose} />
@@ -102,10 +102,10 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="bg-gradient-to-r from-[#39ff14]/20 to-transparent border-b border-[#39ff14]/30 px-6 py-4 flex justify-between items-center">
+        <div className="bg-linear-to-r from-neon-green/20 to-transparent border-b border-neon-green/30 px-6 py-4 flex justify-between items-center">
           <div>
             <h2 className="font-heading text-2xl text-white uppercase tracking-wider">Finaliser la commande</h2>
-            <p className="text-[#a1a1aa] text-xs font-bold uppercase tracking-widest">{cart.length} article(s) · Paiement à la livraison</p>
+            <p className="text-text-muted text-xs font-bold uppercase tracking-widest">{cart.length} article(s) · Paiement à la livraison</p>
           </div>
           <button onClick={handleClose} className="text-white/50 hover:text-white p-2 transition-colors">
             <X size={24} />
@@ -114,63 +114,63 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
 
         {isSuccess ? (
           <div className="p-10 flex flex-col items-center text-center gap-6">
-            <div className="w-24 h-24 rounded-full bg-[#39ff14]/10 flex items-center justify-center">
-              <CheckCircle size={56} className="text-[#39ff14]" />
+            <div className="w-24 h-24 rounded-full bg-neon-green/10 flex items-center justify-center">
+              <CheckCircle size={56} className="text-neon-green" />
             </div>
             <h3 className="font-heading text-4xl text-white uppercase">COMMANDE VALIDÉE !</h3>
-            <p className="text-[#a1a1aa] font-sans">
-              Merci <span className="text-white font-bold">{name}</span> ! Votre commande de <span className="text-[#39ff14] font-bold">{total.toLocaleString()} DZD</span> a bien été enregistrée.
+            <p className="text-text-muted font-sans">
+              Merci <span className="text-white font-bold">{name}</span> ! Votre commande de <span className="text-neon-green font-bold">{total.toLocaleString()} DZD</span> a bien été enregistrée.
             </p>
-            <p className="text-sm text-[#a1a1aa] bg-white/5 px-4 py-2 rounded-sm italic">
+            <p className="text-sm text-text-muted bg-white/5 px-4 py-2 rounded-sm italic">
               Nous vous appellerons au <span className="text-white font-bold">{phone}</span> pour confirmer l'expédition.
             </p>
-            <button onClick={handleClose} className="mt-4 w-full bg-[#39ff14] text-black font-heading text-xl py-4 uppercase hover:bg-white transition-colors">
+            <button onClick={handleClose} className="mt-4 w-full bg-neon-green text-black font-heading text-xl py-4 uppercase hover:bg-white transition-colors">
               Retour au site
             </button>
           </div>
         ) : (
           <div className="flex flex-col">
             <div className="bg-white/5 p-4 border-b border-white/5">
-              <div className="flex justify-between text-xs text-[#a1a1aa] uppercase font-bold tracking-widest mb-1">
+              <div className="flex justify-between text-xs text-text-muted uppercase font-bold tracking-widest mb-1">
                 <span>Sous-total</span><span>{subtotal.toLocaleString()} DZD</span>
               </div>
-              <div className="flex justify-between text-xs text-[#39ff14] uppercase font-bold tracking-widest">
+              <div className="flex justify-between text-xs text-neon-green uppercase font-bold tracking-widest">
                 <span>Livraison ({wilaya || 'Sél. Wilaya'})</span>
                 <span>{deliveryPrice > 0 ? `${deliveryPrice} DZD` : '---'}</span>
               </div>
               <div className="flex justify-between text-lg text-white font-heading uppercase mt-2 pt-2 border-t border-white/5">
                 <span>TOTAL À PAYER</span>
-                <span className="text-[#39ff14]">{total.toLocaleString()} DZD</span>
+                <span className="text-neon-green">{total.toLocaleString()} DZD</span>
               </div>
             </div>
 
             <form onSubmit={handleOrder} className="p-6 flex flex-col gap-4">
               <div className="flex flex-col gap-2">
-                <label className="text-[10px] uppercase font-bold text-[#a1a1aa] tracking-widest">Nom & Prénom *</label>
+                <label className="text-[10px] uppercase font-bold text-text-muted tracking-widest">Nom & Prénom *</label>
                 <div className="relative">
                   <User size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#555]" />
                   <input required type="text" placeholder="Mohamed Benali" value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full bg-[#111] border border-white/10 text-white pl-10 pr-4 py-3 focus:border-[#39ff14] outline-none transition-colors" />
+                    className="w-full bg-[#111] border border-white/10 text-white pl-10 pr-4 py-3 focus:border-neon-green outline-none transition-colors" />
                 </div>
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-[10px] uppercase font-bold text-[#a1a1aa] tracking-widest">Téléphone *</label>
+                <label className="text-[10px] uppercase font-bold text-text-muted tracking-widest">Téléphone *</label>
                 <div className="relative">
                   <Phone size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#555]" />
                   <input required type="tel" placeholder="05 / 06 / 07 ..." value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="w-full bg-[#111] border border-white/10 text-white pl-10 pr-4 py-3 focus:border-[#39ff14] outline-none transition-colors" />
+                    className="w-full bg-[#111] border border-white/10 text-white pl-10 pr-4 py-3 focus:border-neon-green outline-none transition-colors" />
                 </div>
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-[10px] uppercase font-bold text-[#a1a1aa] tracking-widest">Wilaya *</label>
+                <label className="text-[10px] uppercase font-bold text-text-muted tracking-widest">Wilaya *</label>
                 <div className="relative">
                   <MapPin size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#555]" />
                   <select required value={wilaya} onChange={(e) => setWilaya(e.target.value)}
-                    className="w-full bg-[#111] border border-white/10 text-white pl-10 pr-4 py-3 focus:border-[#39ff14] outline-none appearance-none cursor-pointer transition-colors">
+                    className="w-full bg-[#111] border border-white/10 text-white pl-10 pr-4 py-3 focus:border-neon-green outline-none appearance-none cursor-pointer transition-colors">
                     <option value="">Sélectionnez votre Wilaya</option>
                     {WILAYAS.map(w => <option key={w} value={w}>{w}</option>)}
                   </select>
@@ -179,14 +179,14 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-[10px] uppercase font-bold text-[#a1a1aa] tracking-widest">Adresse (Optionnel)</label>
+                <label className="text-[10px] uppercase font-bold text-text-muted tracking-widest">Adresse (Optionnel)</label>
                 <input type="text" placeholder="Rue, Quartier, N° Maison..." value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  className="w-full bg-[#111] border border-white/10 text-white px-4 py-3 focus:border-[#39ff14] outline-none transition-colors" />
+                  className="w-full bg-[#111] border border-white/10 text-white px-4 py-3 focus:border-neon-green outline-none transition-colors" />
               </div>
 
               <button type="submit" disabled={!isFormValid || isSubmitting}
-                className="mt-4 w-full bg-[#39ff14] text-black font-heading text-2xl py-5 uppercase flex items-center justify-center gap-3 hover:bg-white transition-colors active:scale-95 disabled:opacity-50">
+                className="mt-4 w-full bg-neon-green text-black font-heading text-2xl py-5 uppercase flex items-center justify-center gap-3 hover:bg-white transition-colors active:scale-95 disabled:opacity-50">
                 {isSubmitting ? <Loader2 size={24} className="animate-spin" /> : <Package size={24} />}
                 {isSubmitting ? "Validation..." : "Confirmer ma commande"}
               </button>

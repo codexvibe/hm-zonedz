@@ -38,7 +38,7 @@ export const Header = () => {
   return (
     <div className="fixed top-0 left-0 w-full z-50 flex flex-col">
       <div 
-        className="bg-[#ef4444] text-white flex whitespace-nowrap relative font-bold text-xs md:text-sm tracking-widest h-[32px] overflow-hidden border-b border-black w-full"
+        className="bg-neon-red text-white flex whitespace-nowrap relative font-bold text-xs md:text-sm tracking-widest h-[32px] overflow-hidden border-b border-black w-full"
       >
         <div className="animate-marquee h-full flex items-center shrink-0 w-max">
           {/* Bloc de texte 1 */}
@@ -90,7 +90,7 @@ export const Header = () => {
               className="rounded-md object-contain group-hover:scale-105 transition-transform duration-300"
             />
             <div className="flex flex-col leading-none">
-              <span className="text-[10px] md:text-xs text-[#39ff14] font-bold tracking-widest uppercase">N°1 EN ALGÉRIE</span>
+              <span className="text-[10px] md:text-xs text-neon-green font-bold tracking-widest uppercase">N°1 EN ALGÉRIE</span>
             </div>
           </Link>
 
@@ -99,7 +99,7 @@ export const Header = () => {
               <Link 
                 key={link.name} 
                 href={link.href}
-                className="font-heading text-lg text-black dark:text-white hover:text-[#39ff14] dark:hover:text-[#39ff14] transition-colors uppercase tracking-wide"
+                className="font-heading text-lg text-black dark:text-white hover:text-neon-green dark:hover:text-neon-green transition-colors uppercase tracking-wide"
               >
                 {link.name}
               </Link>
@@ -110,7 +110,7 @@ export const Header = () => {
             
             <button 
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="p-2 text-black dark:text-white hover:text-[#39ff14] transition-colors"
+              className="p-2 text-black dark:text-white hover:text-neon-green transition-colors"
               title={theme === 'light' ? "Passer au thème sombre" : "Passer au thème clair"}
             >
               {mounted && (theme === 'light' ? <Moon size={24} /> : <Sun size={24} />)}
@@ -118,11 +118,11 @@ export const Header = () => {
 
             <button 
               onClick={() => setIsSidebarOpen(true)}
-              className="relative p-2 text-black dark:text-white hover:text-[#39ff14] transition-colors"
+              className="relative p-2 text-black dark:text-white hover:text-neon-green transition-colors"
             >
               <ShoppingCart size={24} />
               {itemCount > 0 && (
-                <span className="absolute top-0 right-0 bg-[#ef4444] text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center">
+                <span className="absolute top-0 right-0 bg-neon-red text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center">
                   {itemCount}
                 </span>
               )}
@@ -148,7 +148,7 @@ export const Header = () => {
             className="fixed inset-0 z-50 bg-white/95 dark:bg-black/95 backdrop-blur-xl flex flex-col pt-20 px-6 pb-6"
           >
             <button 
-              className="absolute top-6 right-6 text-black dark:text-white p-2 rounded-full border border-black/20 dark:border-white/20 hover:text-[#39ff14] hover:border-[#39ff14] dark:hover:border-[#39ff14]"
+              className="absolute top-6 right-6 text-black dark:text-white p-2 rounded-full border border-black/20 dark:border-white/20 hover:text-neon-green hover:border-neon-green dark:hover:border-neon-green"
               onClick={() => setMobileMenuOpen(false)}
             >
               <X size={24} />
@@ -159,7 +159,7 @@ export const Header = () => {
                 <Link 
                   key={link.name} 
                   href={link.href}
-                  className="font-heading text-4xl text-black dark:text-white hover:text-[#39ff14] dark:hover:text-[#39ff14] uppercase tracking-wide border-b border-black/10 dark:border-white/10 pb-4"
+                  className="font-heading text-4xl text-black dark:text-white hover:text-neon-green dark:hover:text-neon-green uppercase tracking-wide border-b border-black/10 dark:border-white/10 pb-4"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {link.name}
